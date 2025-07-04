@@ -10,6 +10,15 @@ from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, date
 from enum import Enum
+import json
+from bson import ObjectId
+
+# Custom JSON encoder to handle ObjectId
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return super().default(o)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
