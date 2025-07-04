@@ -101,3 +101,98 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Crear un clon de Empoche adaptado a Anclora con temática marítima. Incluir 4 perfiles de usuario, dashboard completo con gestión de anclas, hábitos, objetivos, presupuesto y diario, más sistema de gamificación."
+
+backend:
+  - task: "Estructura base de datos para usuarios y perfiles"
+    implemented: false
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Iniciando implementación de modelos de datos"
+
+  - task: "API endpoints para gestión de anclas"
+    implemented: false
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Pendiente de implementar CRUD de anclas"
+
+  - task: "API endpoints para dashboard (hábitos, objetivos, presupuesto, diario)"
+    implemented: false
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Pendiente de implementar APIs del dashboard"
+
+frontend:
+  - task: "Estructura base con autenticación y selección de perfil"
+    implemented: false
+    working: "NA"
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Iniciando implementación de interfaz base"
+
+  - task: "Dashboard principal con componentes marítimos"
+    implemented: false
+    working: "NA"
+    file: "App.js, components.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Pendiente de crear dashboard completo"
+
+  - task: "Formulario de creación de anclas con validaciones"
+    implemented: false
+    working: "NA"
+    file: "components.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Pendiente de implementar formulario complejo"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Estructura base de datos para usuarios y perfiles"
+    - "Estructura base con autenticación y selección de perfil"
+    - "Dashboard principal con componentes marítimos"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Iniciando desarrollo de Anclora - implementando estructura base y dashboard principal"
