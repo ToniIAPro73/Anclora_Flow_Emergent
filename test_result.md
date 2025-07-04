@@ -107,39 +107,48 @@ user_problem_statement: "Crear un clon de Empoche adaptado a Anclora con temáti
 backend:
   - task: "Estructura base de datos para usuarios y perfiles"
     implemented: true
-    working: "NA"
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Modelos de datos implementados con 4 perfiles de usuario, enums y esquemas completos"
+      - working: true
+        agent: "testing"
+        comment: "Modelos de datos funcionando correctamente. Se ha corregido un problema con la serialización de ObjectId en MongoDB."
 
   - task: "API endpoints para gestión de anclas"
     implemented: true
-    working: "NA"
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "CRUD completo de anclas implementado con validaciones, categorías y estados"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints de anclas funcionando correctamente. Se pueden crear, completar y obtener anclas sin problemas."
 
   - task: "API endpoints para dashboard (hábitos, objetivos, presupuesto, diario)"
     implemented: true
-    working: "NA"
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "APIs completas para hábitos, objetivos, presupuesto y diario implementadas"
+      - working: true
+        agent: "testing"
+        comment: "Todos los endpoints del dashboard funcionan correctamente. Se ha implementado una función para convertir ObjectId a string para evitar problemas de serialización."
 
 frontend:
   - task: "Estructura base con autenticación y selección de perfil"
