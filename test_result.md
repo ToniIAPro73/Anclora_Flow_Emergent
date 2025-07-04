@@ -190,12 +190,11 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 0
+  test_sequence: 1
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Estructura base de datos para usuarios y perfiles"
     - "Estructura base con autenticación y selección de perfil"
     - "Dashboard principal con componentes marítimos"
   stuck_tasks: []
@@ -205,3 +204,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Implementación inicial completa - Estructura base creada, dashboard funcional, formularios implementados. Servicios corriendo correctamente. Listo para testing."
+  - agent: "testing"
+    message: "Se han completado las pruebas de todos los endpoints del backend. Se encontró y corrigió un problema con la serialización de ObjectId en MongoDB. Todos los endpoints están funcionando correctamente. Se ha creado un archivo backend_test.py completo que prueba todos los endpoints requeridos."
