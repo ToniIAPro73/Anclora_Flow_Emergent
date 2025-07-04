@@ -404,6 +404,32 @@ async def get_dashboard(user_id: str):
     # Get recent diary entries
     diary_entries = await db.diary_entries.find({"user_id": user_id}).sort("created_at", -1).limit(5).to_list(5)
     
+    # Convert ObjectId to string in all documents
+    def convert_objectid(item):
+        if isinstance(item, dict):
+            for k, v in list(item.items()):
+                if isinstance(v, ObjectId):
+                    item[k] = str(v)
+                elif isinstance(v, (dict, list)):
+                    convert_objectid(v)
+        elif isinstance(item, list):
+            for i in range(len(item)):
+                if isinstance(item[i], ObjectId):
+                    item[i] = str(item[i])
+                elif isinstance(item[i], (dict, list)):
+                    convert_objectid(item[i])
+        return item
+    
+    # Convert all ObjectId to string
+    user = convert_objectid(user)
+    active_anclas = convert_objectid(active_anclas)
+    completed_anclas = convert_objectid(completed_anclas)
+    overdue_anclas = convert_objectid(overdue_anclas)
+    habits = convert_objectid(habits)
+    objectives = convert_objectid(objectives)
+    transactions = convert_objectid(transactions)
+    diary_entries = convert_objectid(diary_entries)
+    
     return {
         "user": User(**user),
         "anclas": {
