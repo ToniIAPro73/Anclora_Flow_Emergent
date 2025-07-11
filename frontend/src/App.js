@@ -5,11 +5,15 @@ import {
   ProfileSelection, 
   Dashboard, 
   Timeline,
+  AdvancedBudget,
   AnclaForm, 
   HabitForm, 
   ObjectiveForm, 
   TransactionForm, 
-  DiaryForm 
+  DiaryForm,
+  BudgetLimitForm,
+  SavingsGoalForm,
+  AddMoneyForm
 } from "./components";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
