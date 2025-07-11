@@ -134,6 +134,15 @@ function App() {
     }
   };
 
+  const handleUpdateAnclaDate = async (anclaId, newDate) => {
+    try {
+      await axios.put(`${API}/anclas/${anclaId}`, { start_date: newDate });
+      await loadDashboardData(currentUser.id);
+    } catch (error) {
+      console.error('Error updating ancla date:', error);
+    }
+  };
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'profile-selection':
