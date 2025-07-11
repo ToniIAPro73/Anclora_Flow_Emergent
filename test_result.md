@@ -187,6 +187,18 @@ frontend:
         agent: "main"
         comment: "Formulario completo con validaciones de fecha/hora, emojis, colores y categorías"
 
+  - task: "Timeline interactivo (Marea de Tiempo) con drag-and-drop"
+    implemented: true
+    working: "NA"
+    file: "components.js, App.js, App.css"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Timeline implementado con navegación semanal, drag-and-drop usando react-beautiful-dnd, vista calendario con 7 días, agrupación de anclas por fecha, navegación entre semanas, botón para ir a 'Hoy', leyenda y estadísticas rápidas"
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
