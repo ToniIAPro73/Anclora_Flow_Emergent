@@ -260,6 +260,19 @@ function App() {
     }
   }, [currentUser, dashboardData, notificationSettings, scheduleBudgetAlert]);
 
+  const handleDismissNotification = (index) => {
+    setActiveNotifications(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleEnableNotifications = async () => {
+    try {
+      await requestPermission();
+      setActiveNotifications([]);
+    } catch (error) {
+      console.error('Error enabling notifications:', error);
+    }
+  };
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'profile-selection':
