@@ -24,6 +24,8 @@ function App() {
   const [currentView, setCurrentView] = useState('profile-selection');
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedGoalId, setSelectedGoalId] = useState(null);
+  const [selectedGoalTitle, setSelectedGoalTitle] = useState('');
 
   // Test API connection
   useEffect(() => {
