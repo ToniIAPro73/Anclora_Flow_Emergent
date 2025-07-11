@@ -781,6 +781,24 @@ async def create_savings_goal(goal: SavingsGoalCreate, user_id: str):
 @api_router.get("/savings-goals/{user_id}")
 async def get_savings_goals(user_id: str):
     goals = await db.savings_goals.find({"user_id": user_id}).to_list(1000)
+    
+    # Convert ObjectId to string in all goals
+    def convert_objectid(item):
+        if isinstance(item, dict):
+            for k, v in list(item.items()):
+                if isinstance(v, ObjectId):
+                    item[k] = str(v)
+                elif isinstance(v, (dict, list)):
+                    convert_objectid(v)
+        elif isinstance(item, list):
+            for i in range(len(item)):
+                if isinstance(item[i], ObjectId):
+                    item[i] = str(item[i])
+                elif isinstance(item[i], (dict, list)):
+                    convert_objectid(item[i])
+        return item
+    
+    goals = convert_objectid(goals)
     return goals
 
 @api_router.put("/savings-goals/{goal_id}/add-money")
