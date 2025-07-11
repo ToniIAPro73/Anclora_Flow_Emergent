@@ -150,6 +150,21 @@ backend:
         agent: "testing"
         comment: "Todos los endpoints del dashboard funcionan correctamente. Se ha implementado una función para convertir ObjectId a string para evitar problemas de serialización."
 
+  - task: "API endpoints para presupuesto avanzado"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoints completos para presupuesto avanzado: analytics, límites, metas de ahorro, reportes financieros y predicciones"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints de presupuesto avanzado funcionando correctamente. Analytics, límites, metas de ahorro, reportes y cálculos automáticos verificados. ObjectId serialization y date handling corregidos."
+
   - task: "Advanced Budget Analytics Endpoints"
     implemented: true
     working: true
