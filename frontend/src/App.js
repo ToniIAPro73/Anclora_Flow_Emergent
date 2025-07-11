@@ -6,6 +6,7 @@ import {
   Dashboard, 
   Timeline,
   AdvancedBudget,
+  NotificationSettings,
   AnclaForm, 
   HabitForm, 
   ObjectiveForm, 
@@ -15,6 +16,7 @@ import {
   SavingsGoalForm,
   AddMoneyForm
 } from "./components";
+import useNotifications from "./useNotifications";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
