@@ -193,6 +193,13 @@ export const Dashboard = ({
             </p>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => onViewChange('timeline')}
+              className="btn-secondary"
+              title="Ver Marea de Tiempo"
+            >
+              🌊 Timeline
+            </button>
             <div className="rank-badge">
               {getRankEmoji(user?.rank)} {user?.rank}
             </div>
