@@ -247,6 +247,30 @@ class BudgetAnalytics(BaseModel):
     savings_progress: List[Dict[str, Any]]
     predictions: Dict[str, Any]
 
+# Notification Models
+class NotificationSettings(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    budget_alerts: bool = True
+    ancla_reminders: bool = True
+    savings_goals: bool = True
+    habit_reminders: bool = True
+    reminder_time: int = 30  # minutes before
+    habit_time: str = "09:00"
+    daily_summary: bool = True
+    weekly_report: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class NotificationSettingsCreate(BaseModel):
+    budget_alerts: bool = True
+    ancla_reminders: bool = True
+    savings_goals: bool = True
+    habit_reminders: bool = True
+    reminder_time: int = 30
+    habit_time: str = "09:00"
+    daily_summary: bool = True
+    weekly_report: bool = True
+
 class DiaryEntryCreate(BaseModel):
     content: str
     mood: Mood
