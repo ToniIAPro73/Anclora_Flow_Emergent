@@ -510,6 +510,13 @@ export const Dashboard = ({
           </div>
           <div className="flex items-center gap-4">
             <button
+              onClick={() => onViewChange('notification-settings')}
+              className="btn-secondary"
+              title="Configurar Notificaciones"
+            >
+              🔔 Notificaciones
+            </button>
+            <button
               onClick={() => onViewChange('timeline')}
               className="btn-secondary"
               title="Ver Marea de Tiempo"
