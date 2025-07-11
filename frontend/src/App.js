@@ -149,6 +149,42 @@ function App() {
     }
   };
 
+  const handleCreateBudgetLimit = async (limitData) => {
+    try {
+      await axios.post(`${API}/budget-limits?user_id=${currentUser.id}`, limitData);
+      await loadDashboardData(currentUser.id);
+      setCurrentView('advanced-budget');
+    } catch (error) {
+      console.error('Error creating budget limit:', error);
+    }
+  };
+
+  const handleCreateSavingsGoal = async (goalData) => {
+    try {
+      await axios.post(`${API}/savings-goals?user_id=${currentUser.id}`, goalData);
+      await loadDashboardData(currentUser.id);
+      setCurrentView('advanced-budget');
+    } catch (error) {
+      console.error('Error creating savings goal:', error);
+    }
+  };
+
+  const handleAddToSavingsGoal = async (goalId, amount) => {
+    try {
+      await axios.put(`${API}/savings-goals/${goalId}/add-money?amount=${amount}`);
+      await loadDashboardData(currentUser.id);
+      setCurrentView('advanced-budget');
+    } catch (error) {
+      console.error('Error adding money to savings goal:', error);
+    }
+  };
+
+  const handleOpenAddMoney = (goalId, goalTitle) => {
+    setSelectedGoalId(goalId);
+    setSelectedGoalTitle(goalTitle);
+    setCurrentView('add-money');
+  };
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'profile-selection':
