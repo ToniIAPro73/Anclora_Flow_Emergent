@@ -324,7 +324,16 @@ function App() {
           />
         );
       case 'dashboard':
-        return (
+        return isMobile ? (
+          <MobileDashboard 
+            user={currentUser}
+            data={dashboardData}
+            onViewChange={setCurrentView}
+            onCompleteAncla={handleCompleteAncla}
+            onTrackHabit={handleTrackHabit}
+            onToggleSubtask={handleToggleSubtask}
+          />
+        ) : (
           <Dashboard 
             user={currentUser}
             data={dashboardData}
