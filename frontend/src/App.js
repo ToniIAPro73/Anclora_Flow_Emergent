@@ -4,6 +4,7 @@ import axios from "axios";
 import { 
   ProfileSelection, 
   Dashboard, 
+  MobileDashboard,
   Timeline,
   AdvancedBudget,
   NotificationSettings,
