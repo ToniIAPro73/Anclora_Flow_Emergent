@@ -644,6 +644,24 @@ async def create_diary_entry(entry: DiaryEntryCreate, user_id: str):
 @api_router.get("/diary/{user_id}")
 async def get_diary_entries(user_id: str):
     entries = await db.diary_entries.find({"user_id": user_id}).sort("created_at", -1).to_list(1000)
+    
+    # Convert ObjectId to string in all entries
+    def convert_objectid(item):
+        if isinstance(item, dict):
+            for k, v in list(item.items()):
+                if isinstance(v, ObjectId):
+                    item[k] = str(v)
+                elif isinstance(v, (dict, list)):
+                    convert_objectid(v)
+        elif isinstance(item, list):
+            for i in range(len(item)):
+                if isinstance(item[i], ObjectId):
+                    item[i] = str(item[i])
+                elif isinstance(item[i], (dict, list)):
+                    convert_objectid(item[i])
+        return item
+    
+    entries = convert_objectid(entries)
     return entries
 
 # Include the router in the main app
