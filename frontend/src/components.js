@@ -1195,9 +1195,18 @@ export const Timeline = ({
     <div className="timeline-container">
       <div className="timeline-header">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-800">
-            🌊 Marea de Tiempo
-          </h2>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => onViewChange('dashboard')}
+              className="btn-secondary"
+              title="Volver al Dashboard"
+            >
+              ← Dashboard
+            </button>
+            <h2 className="text-2xl font-bold text-gray-800">
+              🌊 Marea de Tiempo
+            </h2>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigateWeek(-1)}
