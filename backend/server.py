@@ -501,6 +501,24 @@ async def delete_ancla(ancla_id: str):
 @api_router.get("/categories/{user_id}")
 async def get_categories(user_id: str):
     categories = await db.categories.find({"user_id": user_id}).to_list(1000)
+    
+    # Convert ObjectId to string in all categories
+    def convert_objectid(item):
+        if isinstance(item, dict):
+            for k, v in list(item.items()):
+                if isinstance(v, ObjectId):
+                    item[k] = str(v)
+                elif isinstance(v, (dict, list)):
+                    convert_objectid(v)
+        elif isinstance(item, list):
+            for i in range(len(item)):
+                if isinstance(item[i], ObjectId):
+                    item[i] = str(item[i])
+                elif isinstance(item[i], (dict, list)):
+                    convert_objectid(item[i])
+        return item
+    
+    categories = convert_objectid(categories)
     return categories
 
 @api_router.post("/categories", response_model=Category)
