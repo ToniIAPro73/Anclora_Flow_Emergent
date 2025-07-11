@@ -393,6 +393,22 @@ function App() {
   return (
     <div className="App">
       {renderCurrentView()}
+      
+      {/* Notification Permission Banner */}
+      {isSupported && permission === 'default' && (
+        <div className="notification-permission-banner">
+          <span>🔔 Habilita las notificaciones para recibir recordatorios de tus anclas y alertas de presupuesto</span>
+          <button onClick={handleEnableNotifications}>
+            Habilitar Notificaciones
+          </button>
+        </div>
+      )}
+      
+      {/* Notification Toasts */}
+      <NotificationToast 
+        notifications={activeNotifications}
+        onDismiss={handleDismissNotification}
+      />
     </div>
   );
 }
