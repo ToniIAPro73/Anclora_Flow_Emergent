@@ -572,6 +572,486 @@ class AncloraBackendTest(unittest.TestCase):
         # This is important feedback for the timeline drag-and-drop functionality
         
         logger.info("Status consistency test completed")
+    
+    # Advanced Budget Functionality Tests
+    def test_19_create_budget_limits(self):
+        """Test creating budget limits for different categories"""
+        logger.info("Testing budget limit creation...")
+        
+        for profile, user_id in self.user_ids.items():
+            # Get budget categories for this profile
+            dashboard_response = requests.get(f"{API_URL}/users/{user_id}/dashboard")
+            self.assertEqual(dashboard_response.status_code, 200)
+            dashboard = dashboard_response.json()
+            
+            expense_categories = dashboard["budget_categories"]["expense"]
+            
+            # Create budget limits for each expense category
+            for i, category in enumerate(expense_categories[:2]):  # Test first 2 categories
+                limit_data = {
+                    "category": category,
+                    "limit_amount": 1000.0 + (i * 500),  # Different amounts
+                    "period": "monthly"
+                }
+                
+                response = requests.post(f"{API_URL}/budget-limits?user_id={user_id}", json=limit_data)
+                self.assertEqual(response.status_code, 200, f"Failed to create budget limit for {profile} category {category}: {response.text}")
+                
+                limit = response.json()
+                self.assertEqual(limit["category"], category)
+                self.assertEqual(limit["limit_amount"], limit_data["limit_amount"])
+                self.assertEqual(limit["period"], "monthly")
+                self.assertEqual(limit["current_amount"], 0.0)
+                
+                logger.info(f"Created budget limit for {profile} - {category}: ${limit_data['limit_amount']}")
+    
+    def test_20_get_budget_limits(self):
+        """Test retrieving budget limits for users"""
+        logger.info("Testing budget limits retrieval...")
+        
+        for profile, user_id in self.user_ids.items():
+            response = requests.get(f"{API_URL}/budget-limits/{user_id}")
+            self.assertEqual(response.status_code, 200, f"Failed to get budget limits for {profile}: {response.text}")
+            
+            limits = response.json()
+            self.assertGreaterEqual(len(limits), 1, f"Expected at least 1 budget limit for {profile}")
+            
+            # Verify structure of each limit
+            for limit in limits:
+                required_fields = ["id", "user_id", "category", "limit_amount", "current_amount", "period", "created_at"]
+                for field in required_fields:
+                    self.assertIn(field, limit, f"Budget limit missing field {field}")
+                
+                self.assertEqual(limit["user_id"], user_id)
+                self.assertGreaterEqual(limit["limit_amount"], 0)
+                self.assertGreaterEqual(limit["current_amount"], 0)
+                
+            logger.info(f"Retrieved {len(limits)} budget limits for {profile}")
+    
+    def test_21_update_budget_limits(self):
+        """Test updating existing budget limits"""
+        logger.info("Testing budget limit updates...")
+        
+        for profile, user_id in self.user_ids.items():
+            # Get existing limits
+            response = requests.get(f"{API_URL}/budget-limits/{user_id}")
+            self.assertEqual(response.status_code, 200)
+            limits = response.json()
+            
+            if limits:
+                limit_to_update = limits[0]
+                limit_id = limit_to_update["id"]
+                
+                # Update the limit
+                update_data = {
+                    "category": limit_to_update["category"],
+                    "limit_amount": limit_to_update["limit_amount"] + 500.0,  # Increase by 500
+                    "period": "weekly"  # Change period
+                }
+                
+                update_response = requests.put(f"{API_URL}/budget-limits/{limit_id}", json=update_data)
+                self.assertEqual(update_response.status_code, 200, f"Failed to update budget limit for {profile}: {update_response.text}")
+                
+                # Verify the update
+                get_response = requests.get(f"{API_URL}/budget-limits/{user_id}")
+                self.assertEqual(get_response.status_code, 200)
+                updated_limits = get_response.json()
+                
+                updated_limit = next((l for l in updated_limits if l["id"] == limit_id), None)
+                self.assertIsNotNone(updated_limit, "Updated limit not found")
+                self.assertEqual(updated_limit["limit_amount"], update_data["limit_amount"])
+                self.assertEqual(updated_limit["period"], update_data["period"])
+                
+                logger.info(f"Updated budget limit for {profile}: ${updated_limit['limit_amount']} {updated_limit['period']}")
+    
+    def test_22_create_savings_goals(self):
+        """Test creating savings goals"""
+        logger.info("Testing savings goals creation...")
+        
+        from datetime import date, timedelta
+        
+        for profile, user_id in self.user_ids.items():
+            # Create different savings goals for each profile
+            goals_data = [
+                {
+                    "title": f"Emergency Fund for {profile}",
+                    "target_amount": 5000.0,
+                    "target_date": (date.today() + timedelta(days=365)).isoformat(),
+                    "description": "Building emergency fund for financial security"
+                },
+                {
+                    "title": f"Vacation Fund for {profile}",
+                    "target_amount": 2000.0,
+                    "target_date": (date.today() + timedelta(days=180)).isoformat(),
+                    "description": "Saving for a well-deserved vacation"
+                }
+            ]
+            
+            for goal_data in goals_data:
+                response = requests.post(f"{API_URL}/savings-goals?user_id={user_id}", json=goal_data)
+                self.assertEqual(response.status_code, 200, f"Failed to create savings goal for {profile}: {response.text}")
+                
+                goal = response.json()
+                self.assertEqual(goal["title"], goal_data["title"])
+                self.assertEqual(goal["target_amount"], goal_data["target_amount"])
+                self.assertEqual(goal["current_amount"], 0.0)
+                self.assertEqual(goal["description"], goal_data["description"])
+                
+                logger.info(f"Created savings goal for {profile}: {goal['title']} - ${goal['target_amount']}")
+    
+    def test_23_get_savings_goals(self):
+        """Test retrieving savings goals for users"""
+        logger.info("Testing savings goals retrieval...")
+        
+        for profile, user_id in self.user_ids.items():
+            response = requests.get(f"{API_URL}/savings-goals/{user_id}")
+            self.assertEqual(response.status_code, 200, f"Failed to get savings goals for {profile}: {response.text}")
+            
+            goals = response.json()
+            self.assertGreaterEqual(len(goals), 1, f"Expected at least 1 savings goal for {profile}")
+            
+            # Verify structure of each goal
+            for goal in goals:
+                required_fields = ["id", "user_id", "title", "target_amount", "current_amount", "target_date", "description", "created_at"]
+                for field in required_fields:
+                    self.assertIn(field, goal, f"Savings goal missing field {field}")
+                
+                self.assertEqual(goal["user_id"], user_id)
+                self.assertGreaterEqual(goal["target_amount"], 0)
+                self.assertGreaterEqual(goal["current_amount"], 0)
+                
+            logger.info(f"Retrieved {len(goals)} savings goals for {profile}")
+    
+    def test_24_add_money_to_savings_goals(self):
+        """Test adding money to savings goals"""
+        logger.info("Testing adding money to savings goals...")
+        
+        for profile, user_id in self.user_ids.items():
+            # Get existing goals
+            response = requests.get(f"{API_URL}/savings-goals/{user_id}")
+            self.assertEqual(response.status_code, 200)
+            goals = response.json()
+            
+            if goals:
+                goal_to_update = goals[0]
+                goal_id = goal_to_update["id"]
+                amount_to_add = 250.0
+                
+                # Add money to the goal
+                add_response = requests.put(f"{API_URL}/savings-goals/{goal_id}/add-money?amount={amount_to_add}")
+                self.assertEqual(add_response.status_code, 200, f"Failed to add money to savings goal for {profile}: {add_response.text}")
+                
+                result = add_response.json()
+                expected_amount = goal_to_update["current_amount"] + amount_to_add
+                self.assertEqual(result["new_amount"], expected_amount)
+                
+                # Verify the update
+                get_response = requests.get(f"{API_URL}/savings-goals/{user_id}")
+                self.assertEqual(get_response.status_code, 200)
+                updated_goals = get_response.json()
+                
+                updated_goal = next((g for g in updated_goals if g["id"] == goal_id), None)
+                self.assertIsNotNone(updated_goal, "Updated goal not found")
+                self.assertEqual(updated_goal["current_amount"], expected_amount)
+                
+                logger.info(f"Added ${amount_to_add} to savings goal for {profile}: new amount ${updated_goal['current_amount']}")
+    
+    def test_25_budget_analytics_weekly(self):
+        """Test budget analytics with weekly period"""
+        logger.info("Testing budget analytics - weekly period...")
+        
+        for profile, user_id in self.user_ids.items():
+            response = requests.get(f"{API_URL}/budget-analytics/{user_id}?period=weekly")
+            self.assertEqual(response.status_code, 200, f"Failed to get weekly budget analytics for {profile}: {response.text}")
+            
+            analytics = response.json()
+            
+            # Verify required fields
+            required_fields = ["total_income", "total_expenses", "net_balance", "category_breakdown", 
+                             "expense_trends", "budget_alerts", "savings_progress", "predictions"]
+            for field in required_fields:
+                self.assertIn(field, analytics, f"Budget analytics missing field {field}")
+            
+            # Verify data types
+            self.assertIsInstance(analytics["total_income"], (int, float))
+            self.assertIsInstance(analytics["total_expenses"], (int, float))
+            self.assertIsInstance(analytics["net_balance"], (int, float))
+            self.assertIsInstance(analytics["category_breakdown"], dict)
+            self.assertIsInstance(analytics["expense_trends"], list)
+            self.assertIsInstance(analytics["budget_alerts"], list)
+            self.assertIsInstance(analytics["savings_progress"], list)
+            self.assertIsInstance(analytics["predictions"], dict)
+            
+            # Verify calculations
+            self.assertEqual(analytics["net_balance"], analytics["total_income"] - analytics["total_expenses"])
+            
+            logger.info(f"Weekly analytics for {profile}: Income ${analytics['total_income']}, Expenses ${analytics['total_expenses']}, Net ${analytics['net_balance']}")
+    
+    def test_26_budget_analytics_monthly(self):
+        """Test budget analytics with monthly period"""
+        logger.info("Testing budget analytics - monthly period...")
+        
+        for profile, user_id in self.user_ids.items():
+            response = requests.get(f"{API_URL}/budget-analytics/{user_id}?period=monthly")
+            self.assertEqual(response.status_code, 200, f"Failed to get monthly budget analytics for {profile}: {response.text}")
+            
+            analytics = response.json()
+            
+            # Verify we have transaction data (from previous tests)
+            self.assertGreaterEqual(analytics["total_income"], 0, f"Expected some income for {profile}")
+            self.assertGreaterEqual(analytics["total_expenses"], 0, f"Expected some expenses for {profile}")
+            
+            # Verify category breakdown has data
+            if analytics["total_expenses"] > 0:
+                self.assertGreater(len(analytics["category_breakdown"]), 0, f"Expected category breakdown for {profile}")
+            
+            # Verify expense trends structure
+            for trend in analytics["expense_trends"]:
+                self.assertIn("month", trend)
+                self.assertIn("amount", trend)
+                self.assertIsInstance(trend["amount"], (int, float))
+            
+            # Verify savings progress structure
+            for progress in analytics["savings_progress"]:
+                required_fields = ["id", "title", "progress", "current_amount", "target_amount"]
+                for field in required_fields:
+                    self.assertIn(field, progress, f"Savings progress missing field {field}")
+            
+            # Verify predictions structure
+            self.assertIn("next_month_expenses", analytics["predictions"])
+            self.assertIn("annual_projection", analytics["predictions"])
+            
+            logger.info(f"Monthly analytics for {profile}: {len(analytics['expense_trends'])} trends, {len(analytics['savings_progress'])} goals")
+    
+    def test_27_budget_analytics_yearly(self):
+        """Test budget analytics with yearly period"""
+        logger.info("Testing budget analytics - yearly period...")
+        
+        for profile, user_id in self.user_ids.items():
+            response = requests.get(f"{API_URL}/budget-analytics/{user_id}?period=yearly")
+            self.assertEqual(response.status_code, 200, f"Failed to get yearly budget analytics for {profile}: {response.text}")
+            
+            analytics = response.json()
+            
+            # Verify structure is consistent across periods
+            self.assertIn("total_income", analytics)
+            self.assertIn("total_expenses", analytics)
+            self.assertIn("net_balance", analytics)
+            
+            # Yearly should include all our test data
+            self.assertGreaterEqual(analytics["total_income"], 1000.0, f"Expected at least $1000 income for {profile}")
+            self.assertGreaterEqual(analytics["total_expenses"], 500.0, f"Expected at least $500 expenses for {profile}")
+            
+            logger.info(f"Yearly analytics for {profile}: Income ${analytics['total_income']}, Expenses ${analytics['total_expenses']}")
+    
+    def test_28_budget_analytics_alerts(self):
+        """Test budget analytics alerts functionality"""
+        logger.info("Testing budget analytics alerts...")
+        
+        # Use content_creator profile for detailed alert testing
+        profile = "content_creator"
+        user_id = self.user_ids[profile]
+        
+        # Get current analytics to see if we have alerts
+        response = requests.get(f"{API_URL}/budget-analytics/{user_id}?period=monthly")
+        self.assertEqual(response.status_code, 200)
+        analytics = response.json()
+        
+        # Verify alert structure
+        for alert in analytics["budget_alerts"]:
+            required_fields = ["category", "percentage", "spent", "limit", "severity"]
+            for field in required_fields:
+                self.assertIn(field, alert, f"Budget alert missing field {field}")
+            
+            self.assertIn(alert["severity"], ["high", "medium", "low"])
+            self.assertGreaterEqual(alert["percentage"], 0)
+            self.assertGreaterEqual(alert["spent"], 0)
+            self.assertGreaterEqual(alert["limit"], 0)
+        
+        logger.info(f"Found {len(analytics['budget_alerts'])} budget alerts for {profile}")
+    
+    def test_29_financial_reports_weekly(self):
+        """Test financial report generation - weekly"""
+        logger.info("Testing financial reports - weekly...")
+        
+        for profile, user_id in self.user_ids.items():
+            response = requests.get(f"{API_URL}/financial-reports/{user_id}?report_type=weekly")
+            self.assertEqual(response.status_code, 200, f"Failed to generate weekly financial report for {profile}: {response.text}")
+            
+            report = response.json()
+            
+            # Verify required fields
+            required_fields = ["id", "user_id", "report_type", "period_start", "period_end", 
+                             "total_income", "total_expenses", "net_balance", "category_breakdown", "trends", "created_at"]
+            for field in required_fields:
+                self.assertIn(field, report, f"Financial report missing field {field}")
+            
+            # Verify report type
+            self.assertEqual(report["report_type"], "weekly")
+            self.assertEqual(report["user_id"], user_id)
+            
+            # Verify calculations
+            self.assertEqual(report["net_balance"], report["total_income"] - report["total_expenses"])
+            
+            # Verify date fields are properly serialized
+            self.assertIsInstance(report["period_start"], str)
+            self.assertIsInstance(report["period_end"], str)
+            
+            logger.info(f"Generated weekly financial report for {profile}: ${report['net_balance']} net balance")
+    
+    def test_30_financial_reports_monthly(self):
+        """Test financial report generation - monthly"""
+        logger.info("Testing financial reports - monthly...")
+        
+        for profile, user_id in self.user_ids.items():
+            response = requests.get(f"{API_URL}/financial-reports/{user_id}?report_type=monthly")
+            self.assertEqual(response.status_code, 200, f"Failed to generate monthly financial report for {profile}: {response.text}")
+            
+            report = response.json()
+            
+            self.assertEqual(report["report_type"], "monthly")
+            self.assertGreaterEqual(report["total_income"], 0)
+            self.assertGreaterEqual(report["total_expenses"], 0)
+            
+            # Verify category breakdown
+            self.assertIsInstance(report["category_breakdown"], dict)
+            if report["total_expenses"] > 0:
+                self.assertGreater(len(report["category_breakdown"]), 0)
+            
+            # Verify trends
+            self.assertIsInstance(report["trends"], dict)
+            
+            logger.info(f"Generated monthly financial report for {profile}: {len(report['category_breakdown'])} categories")
+    
+    def test_31_financial_reports_yearly(self):
+        """Test financial report generation - yearly"""
+        logger.info("Testing financial reports - yearly...")
+        
+        for profile, user_id in self.user_ids.items():
+            response = requests.get(f"{API_URL}/financial-reports/{user_id}?report_type=yearly")
+            self.assertEqual(response.status_code, 200, f"Failed to generate yearly financial report for {profile}: {response.text}")
+            
+            report = response.json()
+            
+            self.assertEqual(report["report_type"], "yearly")
+            
+            # Yearly should capture all our test transactions
+            self.assertGreaterEqual(report["total_income"], 1000.0, f"Expected at least $1000 yearly income for {profile}")
+            self.assertGreaterEqual(report["total_expenses"], 500.0, f"Expected at least $500 yearly expenses for {profile}")
+            
+            logger.info(f"Generated yearly financial report for {profile}: ${report['total_income']} income, ${report['total_expenses']} expenses")
+    
+    def test_32_integration_with_existing_transactions(self):
+        """Test that budget analytics properly integrates with existing transaction data"""
+        logger.info("Testing integration with existing transaction data...")
+        
+        for profile, user_id in self.user_ids.items():
+            # Get all transactions for this user
+            transactions_response = requests.get(f"{API_URL}/transactions/{user_id}")
+            self.assertEqual(transactions_response.status_code, 200)
+            transactions = transactions_response.json()
+            
+            # Calculate expected totals
+            expected_income = sum(t["amount"] for t in transactions if t["type"] == "income")
+            expected_expenses = sum(t["amount"] for t in transactions if t["type"] == "expense")
+            expected_net = expected_income - expected_expenses
+            
+            # Get analytics and compare
+            analytics_response = requests.get(f"{API_URL}/budget-analytics/{user_id}?period=yearly")
+            self.assertEqual(analytics_response.status_code, 200)
+            analytics = analytics_response.json()
+            
+            # Verify the analytics match our transaction data
+            self.assertEqual(analytics["total_income"], expected_income, 
+                           f"Analytics income ${analytics['total_income']} doesn't match expected ${expected_income} for {profile}")
+            self.assertEqual(analytics["total_expenses"], expected_expenses,
+                           f"Analytics expenses ${analytics['total_expenses']} doesn't match expected ${expected_expenses} for {profile}")
+            self.assertEqual(analytics["net_balance"], expected_net,
+                           f"Analytics net balance ${analytics['net_balance']} doesn't match expected ${expected_net} for {profile}")
+            
+            logger.info(f"Verified integration for {profile}: {len(transactions)} transactions, ${expected_net} net balance")
+    
+    def test_33_date_serialization_savings_goals(self):
+        """Test proper date serialization in savings goals"""
+        logger.info("Testing date serialization in savings goals...")
+        
+        from datetime import date, timedelta
+        
+        profile = "professional"  # Use one profile for date testing
+        user_id = self.user_ids[profile]
+        
+        # Create a goal with a specific target date
+        target_date = date.today() + timedelta(days=90)
+        goal_data = {
+            "title": "Date Serialization Test Goal",
+            "target_amount": 1500.0,
+            "target_date": target_date.isoformat(),
+            "description": "Testing date serialization"
+        }
+        
+        response = requests.post(f"{API_URL}/savings-goals?user_id={user_id}", json=goal_data)
+        self.assertEqual(response.status_code, 200, f"Failed to create goal with date: {response.text}")
+        
+        goal = response.json()
+        
+        # Verify the target_date is properly handled
+        self.assertIn("target_date", goal)
+        self.assertIsNotNone(goal["target_date"])
+        
+        # Get the goal back and verify date consistency
+        goals_response = requests.get(f"{API_URL}/savings-goals/{user_id}")
+        self.assertEqual(goals_response.status_code, 200)
+        goals = goals_response.json()
+        
+        created_goal = next((g for g in goals if g["title"] == goal_data["title"]), None)
+        self.assertIsNotNone(created_goal, "Created goal not found in list")
+        
+        # Verify date field exists and is properly formatted
+        self.assertIn("target_date", created_goal)
+        self.assertIsInstance(created_goal["target_date"], str)
+        
+        logger.info(f"Date serialization test passed: {created_goal['target_date']}")
+    
+    def test_34_error_handling_budget_endpoints(self):
+        """Test error handling for budget endpoints"""
+        logger.info("Testing error handling for budget endpoints...")
+        
+        # Test with non-existent user ID
+        fake_user_id = "non-existent-user-id"
+        
+        # Test budget analytics with fake user
+        response = requests.get(f"{API_URL}/budget-analytics/{fake_user_id}")
+        # Should return empty/default analytics rather than error
+        self.assertEqual(response.status_code, 200)
+        analytics = response.json()
+        self.assertEqual(analytics["total_income"], 0.0)
+        self.assertEqual(analytics["total_expenses"], 0.0)
+        
+        # Test budget limits with fake user
+        response = requests.get(f"{API_URL}/budget-limits/{fake_user_id}")
+        self.assertEqual(response.status_code, 200)
+        limits = response.json()
+        self.assertEqual(len(limits), 0)
+        
+        # Test savings goals with fake user
+        response = requests.get(f"{API_URL}/savings-goals/{fake_user_id}")
+        self.assertEqual(response.status_code, 200)
+        goals = response.json()
+        self.assertEqual(len(goals), 0)
+        
+        # Test updating non-existent budget limit
+        response = requests.put(f"{API_URL}/budget-limits/fake-limit-id", json={
+            "category": "Test",
+            "limit_amount": 1000.0,
+            "period": "monthly"
+        })
+        self.assertEqual(response.status_code, 404)
+        
+        # Test adding money to non-existent savings goal
+        response = requests.put(f"{API_URL}/savings-goals/fake-goal-id/add-money?amount=100")
+        self.assertEqual(response.status_code, 404)
+        
+        logger.info("Error handling tests completed")
 
 if __name__ == "__main__":
     # Run the tests in order
