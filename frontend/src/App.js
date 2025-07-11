@@ -215,6 +215,18 @@ function App() {
             onViewChange={setCurrentView}
           />
         );
+      case 'advanced-budget':
+        return (
+          <AdvancedBudget 
+            user={currentUser}
+            data={dashboardData}
+            onViewChange={setCurrentView}
+            onCreateTransaction={handleCreateTransaction}
+            onCreateBudgetLimit={handleCreateBudgetLimit}
+            onCreateSavingsGoal={handleCreateSavingsGoal}
+            onAddToSavingsGoal={handleOpenAddMoney}
+          />
+        );
       case 'create-ancla':
         return (
           <AnclaForm 
