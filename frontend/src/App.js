@@ -266,6 +266,29 @@ function App() {
             onCancel={() => setCurrentView('dashboard')}
           />
         );
+      case 'create-budget-limit':
+        return (
+          <BudgetLimitForm 
+            onSubmit={handleCreateBudgetLimit}
+            onCancel={() => setCurrentView('advanced-budget')}
+            userProfile={currentUser?.profile}
+          />
+        );
+      case 'create-savings-goal':
+        return (
+          <SavingsGoalForm 
+            onSubmit={handleCreateSavingsGoal}
+            onCancel={() => setCurrentView('advanced-budget')}
+          />
+        );
+      case 'add-money':
+        return (
+          <AddMoneyForm 
+            onSubmit={(amount) => handleAddToSavingsGoal(selectedGoalId, amount)}
+            onCancel={() => setCurrentView('advanced-budget')}
+            goalTitle={selectedGoalTitle}
+          />
+        );
       default:
         return <div>Vista no encontrada</div>;
     }
