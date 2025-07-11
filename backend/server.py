@@ -575,7 +575,13 @@ async def create_transaction(transaction: TransactionCreate, user_id: str):
     transaction_dict = transaction.dict()
     transaction_dict["user_id"] = user_id
     transaction_obj = Transaction(**transaction_dict)
-    await db.transactions.insert_one(transaction_obj.dict())
+    
+    # Convert the Transaction object to dict and handle date serialization
+    trans_dict = transaction_obj.dict()
+    if isinstance(trans_dict.get("date"), date):
+        trans_dict["date"] = trans_dict["date"].isoformat()
+    
+    await db.transactions.insert_one(trans_dict)
     return transaction_obj
 
 @api_router.get("/transactions/{user_id}")
