@@ -763,10 +763,19 @@ async def update_budget_limit(limit_id: str, limit: BudgetLimitCreate):
 async def create_savings_goal(goal: SavingsGoalCreate, user_id: str):
     goal_dict = goal.dict()
     goal_dict["user_id"] = user_id
+    
+    # Handle date serialization
     if isinstance(goal_dict.get("target_date"), date):
         goal_dict["target_date"] = goal_dict["target_date"].isoformat()
+    
     goal_obj = SavingsGoal(**goal_dict)
-    await db.savings_goals.insert_one(goal_obj.dict())
+    
+    # Convert the SavingsGoal object to dict and handle date serialization
+    savings_dict = goal_obj.dict()
+    if isinstance(savings_dict.get("target_date"), date):
+        savings_dict["target_date"] = savings_dict["target_date"].isoformat()
+    
+    await db.savings_goals.insert_one(savings_dict)
     return goal_obj
 
 @api_router.get("/savings-goals/{user_id}")
