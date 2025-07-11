@@ -304,6 +304,15 @@ function App() {
     return isMobile && currentUser && ['dashboard', 'timeline', 'advanced-budget', 'notification-settings'].includes(currentView);
   };
 
+  const handleEnableNotifications = async () => {
+    try {
+      await requestPermission();
+      setActiveNotifications([]);
+    } catch (error) {
+      console.error('Error enabling notifications:', error);
+    }
+  };
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'profile-selection':
