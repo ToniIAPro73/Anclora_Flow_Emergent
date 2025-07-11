@@ -1100,3 +1100,262 @@ export const DiaryForm = ({ onSubmit, onCancel }) => {
     </div>
   );
 };
+
+// Timeline Component - Marea de Tiempo
+export const Timeline = ({ 
+  user, 
+  data, 
+  onUpdateAnclaDate, 
+  onCompleteAncla, 
+  onViewChange 
+}) => {
+  const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Generate week days
+  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
+  const weekDays = [];
+  
+  for (let i = 0; i < 7; i++) {
+    weekDays.push(addDays(weekStart, i));
+  }
+
+  // Group anclas by date
+  const groupAnclasByDate = (anclas) => {
+    const grouped = {};
+    weekDays.forEach(day => {
+      const dateKey = format(day, 'yyyy-MM-dd');
+      grouped[dateKey] = [];
+    });
+
+    anclas.forEach(ancla => {
+      const anclaDate = format(parseISO(ancla.start_date), 'yyyy-MM-dd');
+      if (grouped[anclaDate]) {
+        grouped[anclaDate].push(ancla);
+      }
+    });
+
+    return grouped;
+  };
+
+  const allAnclas = [
+    ...(data?.anclas?.active || []),
+    ...(data?.anclas?.completed || []),
+    ...(data?.anclas?.overdue || [])
+  ];
+
+  const groupedAnclas = groupAnclasByDate(allAnclas);
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const { source, destination, draggableId } = result;
+    
+    // If dropped in the same position, do nothing
+    if (source.droppableId === destination.droppableId && 
+        source.index === destination.index) {
+      return;
+    }
+
+    // Find the ancla being moved
+    const anclaId = draggableId;
+    const newDate = destination.droppableId;
+
+    // Update the ancla date
+    onUpdateAnclaDate(anclaId, newDate);
+  };
+
+  const navigateWeek = (direction) => {
+    const newWeek = new Date(currentWeek);
+    newWeek.setDate(newWeek.getDate() + (direction * 7));
+    setCurrentWeek(newWeek);
+  };
+
+  const goToToday = () => {
+    const today = new Date();
+    setCurrentWeek(today);
+    setSelectedDate(today);
+  };
+
+  const getTimelineHeader = () => {
+    const weekStartStr = format(weekStart, 'dd MMM', { locale: es });
+    const weekEndStr = format(weekEnd, 'dd MMM yyyy', { locale: es });
+    return `${weekStartStr} - ${weekEndStr}`;
+  };
+
+  return (
+    <div className="timeline-container">
+      <div className="timeline-header">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-gray-800">
+            🌊 Marea de Tiempo
+          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigateWeek(-1)}
+              className="btn-secondary"
+            >
+              ← Semana Anterior
+            </button>
+            <button
+              onClick={goToToday}
+              className="btn-primary"
+            >
+              Hoy
+            </button>
+            <button
+              onClick={() => navigateWeek(1)}
+              className="btn-secondary"
+            >
+              Semana Siguiente →
+            </button>
+          </div>
+        </div>
+        <div className="text-center text-gray-600 mb-4">
+          {getTimelineHeader()}
+        </div>
+      </div>
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="timeline-grid">
+          {weekDays.map((day, index) => {
+            const dateKey = format(day, 'yyyy-MM-dd');
+            const dayAnclas = groupedAnclas[dateKey] || [];
+            const isToday = isSameDay(day, new Date());
+            const isSelected = isSameDay(day, selectedDate);
+
+            return (
+              <div
+                key={dateKey}
+                className={`timeline-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
+                onClick={() => setSelectedDate(day)}
+              >
+                <div className="timeline-day-header">
+                  <div className="text-sm font-medium text-gray-600">
+                    {format(day, 'EEE', { locale: es })}
+                  </div>
+                  <div className="text-lg font-bold text-gray-800">
+                    {format(day, 'd')}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {format(day, 'MMM', { locale: es })}
+                  </div>
+                </div>
+
+                <Droppable droppableId={dateKey}>
+                  {(provided, snapshot) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className={`timeline-day-content ${
+                        snapshot.isDraggingOver ? 'dragover' : ''
+                      }`}
+                    >
+                      {dayAnclas.map((ancla, anclaIndex) => (
+                        <Draggable
+                          key={ancla.id}
+                          draggableId={ancla.id}
+                          index={anclaIndex}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`timeline-ancla ${ancla.status} ${
+                                snapshot.isDragging ? 'dragging' : ''
+                              }`}
+                            >
+                              <div className="timeline-ancla-header">
+                                <span className="timeline-ancla-emoji">{ancla.emoji}</span>
+                                <span className="timeline-ancla-time">
+                                  {ancla.start_time && format(parseISO(`2000-01-01T${ancla.start_time}`), 'HH:mm')}
+                                </span>
+                              </div>
+                              <div className="timeline-ancla-title">
+                                {ancla.title}
+                              </div>
+                              <div className="timeline-ancla-category">
+                                {ancla.category}
+                              </div>
+                              <div className="timeline-ancla-actions">
+                                {ancla.status === 'active' && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onCompleteAncla(ancla.id);
+                                    }}
+                                    className="timeline-action-btn complete"
+                                  >
+                                    ✓
+                                  </button>
+                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    // TODO: Implement edit functionality
+                                  }}
+                                  className="timeline-action-btn edit"
+                                >
+                                  ✏️
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                      
+                      {/* Add new ancla button */}
+                      <button
+                        onClick={() => {
+                          onViewChange('create-ancla', { selectedDate: dateKey });
+                        }}
+                        className="timeline-add-ancla"
+                      >
+                        + Añadir Ancla
+                      </button>
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+            );
+          })}
+        </div>
+      </DragDropContext>
+
+      {/* Timeline Legend */}
+      <div className="timeline-legend">
+        <div className="legend-item">
+          <div className="legend-color active"></div>
+          <span>Activas</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color completed"></div>
+          <span>Completadas</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color overdue"></div>
+          <span>Vencidas</span>
+        </div>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="timeline-stats">
+        <div className="stat-item">
+          <div className="stat-number">{data?.anclas?.active?.length || 0}</div>
+          <div className="stat-label">Anclas Activas</div>
+        </div>
+        <div className="stat-item">
+          <div className="stat-number">{data?.anclas?.completed?.length || 0}</div>
+          <div className="stat-label">Completadas</div>
+        </div>
+        <div className="stat-item">
+          <div className="stat-number">{user?.current_streak || 0}</div>
+          <div className="stat-label">Días de Racha</div>
+        </div>
+      </div>
+    </div>
+  );
+};
