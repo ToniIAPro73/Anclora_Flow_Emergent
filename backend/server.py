@@ -1002,6 +1002,137 @@ async def generate_financial_report(user_id: str, report_type: str = "monthly"):
     
     return report
 
+# Notification Settings routes
+@api_router.post("/notification-settings", response_model=NotificationSettings)
+async def create_notification_settings(settings: NotificationSettingsCreate, user_id: str):
+    settings_dict = settings.dict()
+    settings_dict["user_id"] = user_id
+    settings_obj = NotificationSettings(**settings_dict)
+    
+    # Check if settings already exist for this user
+    existing = await db.notification_settings.find_one({"user_id": user_id})
+    if existing:
+        # Update existing settings
+        result = await db.notification_settings.update_one(
+            {"user_id": user_id}, 
+            {"$set": settings_dict}
+        )
+        return settings_obj
+    else:
+        # Create new settings
+        await db.notification_settings.insert_one(settings_obj.dict())
+        return settings_obj
+
+@api_router.get("/notification-settings/{user_id}")
+async def get_notification_settings(user_id: str):
+    settings = await db.notification_settings.find_one({"user_id": user_id})
+    if not settings:
+        # Return default settings if none exist
+        default_settings = NotificationSettings(user_id=user_id)
+        return default_settings
+    return NotificationSettings(**settings)
+
+@api_router.put("/notification-settings/{user_id}")
+async def update_notification_settings(user_id: str, settings: NotificationSettingsCreate):
+    settings_dict = settings.dict()
+    result = await db.notification_settings.update_one(
+        {"user_id": user_id}, 
+        {"$set": settings_dict}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Notification settings not found")
+    return {"message": "Notification settings updated successfully"}
+
+# Notification trigger endpoints
+@api_router.post("/notifications/trigger-budget-alert")
+async def trigger_budget_alert(user_id: str, category: str, percentage: float, limit: float, spent: float):
+    """Trigger a budget alert notification"""
+    settings = await db.notification_settings.find_one({"user_id": user_id})
+    if not settings or not settings.get("budget_alerts", True):
+        return {"message": "Budget alerts disabled for user"}
+    
+    # Here you would typically send to a push notification service
+    # For now, we'll just log the notification
+    notification_data = {
+        "user_id": user_id,
+        "type": "budget_alert",
+        "title": "⚠️ Alerta de Presupuesto",
+        "body": f"Has gastado ${spent:.2f} de ${limit:.2f} en \"{category}\" ({percentage:.1f}%)",
+        "data": {"url": "/advanced-budget", "category": category},
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.notifications.insert_one(notification_data)
+    return {"message": "Budget alert triggered", "notification": notification_data}
+
+@api_router.post("/notifications/trigger-ancla-reminder")
+async def trigger_ancla_reminder(user_id: str, ancla_id: str, minutes_before: int = 30):
+    """Trigger an ancla reminder notification"""
+    settings = await db.notification_settings.find_one({"user_id": user_id})
+    if not settings or not settings.get("ancla_reminders", True):
+        return {"message": "Ancla reminders disabled for user"}
+    
+    # Get the ancla details
+    ancla = await db.anclas.find_one({"id": ancla_id})
+    if not ancla:
+        raise HTTPException(status_code=404, detail="Ancla not found")
+    
+    notification_data = {
+        "user_id": user_id,
+        "type": "ancla_reminder",
+        "title": "⚓ Recordatorio de Ancla",
+        "body": f"\"{ancla['title']}\" comienza en {minutes_before} minutos",
+        "data": {"url": "/dashboard", "ancla_id": ancla_id},
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.notifications.insert_one(notification_data)
+    return {"message": "Ancla reminder triggered", "notification": notification_data}
+
+@api_router.post("/notifications/trigger-savings-goal")
+async def trigger_savings_goal_notification(user_id: str, goal_id: str, milestone: str):
+    """Trigger a savings goal notification"""
+    settings = await db.notification_settings.find_one({"user_id": user_id})
+    if not settings or not settings.get("savings_goals", True):
+        return {"message": "Savings goal notifications disabled for user"}
+    
+    # Get the goal details
+    goal = await db.savings_goals.find_one({"id": goal_id})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Savings goal not found")
+    
+    title = "🏦 Meta de Ahorro"
+    if milestone == "completed":
+        body = f"¡Felicidades! Has completado tu meta \"{goal['title']}\""
+    elif milestone == "progress":
+        percentage = (goal['current_amount'] / goal['target_amount']) * 100
+        body = f"Has alcanzado el {percentage:.1f}% de tu meta \"{goal['title']}\""
+    elif milestone == "deadline":
+        body = f"Tu meta \"{goal['title']}\" vence pronto. ¡Sigue ahorrando!"
+    else:
+        body = f"Actualización en tu meta \"{goal['title']}\""
+    
+    notification_data = {
+        "user_id": user_id,
+        "type": "savings_goal",
+        "title": title,
+        "body": body,
+        "data": {"url": "/advanced-budget", "goal_id": goal_id},
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.notifications.insert_one(notification_data)
+    return {"message": "Savings goal notification triggered", "notification": notification_data}
+
+@api_router.get("/notifications/{user_id}")
+async def get_user_notifications(user_id: str, limit: int = 50):
+    """Get user's recent notifications"""
+    notifications = await db.notifications.find(
+        {"user_id": user_id}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return notifications
+
 # Include the router in the main app
 app.include_router(api_router)
 
