@@ -2356,3 +2356,141 @@ export const NotificationToast = ({ notifications, onDismiss }) => {
     </div>
   );
 };
+
+// Mobile Navigation Component
+export const MobileNavigation = ({ currentView, onViewChange, user }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const navItems = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: '🏠',
+      view: 'dashboard'
+    },
+    {
+      id: 'timeline',
+      label: 'Timeline',
+      icon: '🌊',
+      view: 'timeline'
+    },
+    {
+      id: 'budget',
+      label: 'Presupuesto',
+      icon: '💰',
+      view: 'advanced-budget'
+    },
+    {
+      id: 'notifications',
+      label: 'Notificaciones',
+      icon: '🔔',
+      view: 'notification-settings'
+    }
+  ];
+
+  const quickActions = [
+    {
+      id: 'add-ancla',
+      label: 'Nueva Ancla',
+      icon: '⚓',
+      view: 'create-ancla'
+    },
+    {
+      id: 'add-transaction',
+      label: 'Transacción',
+      icon: '💸',
+      view: 'create-transaction'
+    },
+    {
+      id: 'add-habit',
+      label: 'Hábito',
+      icon: '📊',
+      view: 'create-habit'
+    }
+  ];
+
+  const handleNavigation = (view) => {
+    onViewChange(view);
+    setIsMenuOpen(false);
+  };
+
+  return (
+    <>
+      {/* Bottom Navigation Bar */}
+      <div className="mobile-bottom-nav">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            className={`nav-item ${currentView === item.view ? 'active' : ''}`}
+            onClick={() => handleNavigation(item.view)}
+          >
+            <span className="nav-icon">{item.icon}</span>
+            <span className="nav-label">{item.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Floating Action Button */}
+      <div className="mobile-fab-container">
+        <button
+          className={`mobile-fab ${isMenuOpen ? 'open' : ''}`}
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? '✕' : '+'}
+        </button>
+        
+        {/* Quick Actions Menu */}
+        {isMenuOpen && (
+          <div className="fab-menu">
+            {quickActions.map((action, index) => (
+              <button
+                key={action.id}
+                className="fab-action"
+                onClick={() => handleNavigation(action.view)}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <span className="fab-icon">{action.icon}</span>
+                <span className="fab-label">{action.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Backdrop */}
+      {isMenuOpen && (
+        <div 
+          className="fab-backdrop"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+    </>
+  );
+};
+
+// Mobile Header Component
+export const MobileHeader = ({ title, onBack, actions }) => {
+  return (
+    <div className="mobile-header">
+      <div className="header-left">
+        {onBack && (
+          <button className="header-back-btn" onClick={onBack}>
+            ←
+          </button>
+        )}
+        <h1 className="header-title">{title}</h1>
+      </div>
+      <div className="header-actions">
+        {actions?.map((action, index) => (
+          <button
+            key={index}
+            className="header-action-btn"
+            onClick={action.onClick}
+          >
+            {action.icon}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
