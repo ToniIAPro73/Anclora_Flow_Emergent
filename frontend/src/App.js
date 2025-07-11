@@ -163,6 +163,16 @@ function App() {
             onToggleSubtask={handleToggleSubtask}
           />
         );
+      case 'timeline':
+        return (
+          <Timeline 
+            user={currentUser}
+            data={dashboardData}
+            onUpdateAnclaDate={handleUpdateAnclaDate}
+            onCompleteAncla={handleCompleteAncla}
+            onViewChange={setCurrentView}
+          />
+        );
       case 'create-ancla':
         return (
           <AnclaForm 
