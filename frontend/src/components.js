@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { format, addDays, startOfWeek, endOfWeek, isSameDay, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 // Profile Selection Component
 export const ProfileSelection = ({ onProfileSelect, loading }) => {
