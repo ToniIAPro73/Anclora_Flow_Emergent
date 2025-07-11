@@ -199,6 +199,52 @@ function App() {
     setCurrentView('add-money');
   };
 
+  const handleSaveNotificationSettings = async (settings) => {
+    try {
+      await axios.post(`${API}/notification-settings?user_id=${currentUser.id}`, settings);
+      setNotificationSettings(settings);
+      
+      // Schedule notifications based on settings
+      if (settings.budget_alerts && dashboardData?.budget_analytics?.budget_alerts) {
+        dashboardData.budget_analytics.budget_alerts.forEach(alert => {
+          if (alert.percentage >= 90) {
+            scheduleBudgetAlert(alert.category, alert.percentage, alert.limit, alert.spent);
+          }
+        });
+      }
+
+      if (settings.ancla_reminders && dashboardData?.anclas?.active) {
+        dashboardData.anclas.active.forEach(ancla => {
+          scheduleAnclaReminder(ancla, settings.reminder_time);
+        });
+      }
+
+      if (settings.habit_reminders && dashboardData?.habits) {
+        dashboardData.habits.forEach(habit => {
+          scheduleHabitReminder(habit, settings.habit_time);
+        });
+      }
+
+    } catch (error) {
+      console.error('Error saving notification settings:', error);
+    }
+  };
+
+  // Auto-schedule notifications when dashboard data changes
+  useEffect(() => {
+    if (currentUser && dashboardData && notificationSettings.budget_alerts) {
+      // Auto-schedule budget alerts
+      const budgetAnalytics = dashboardData.budget_analytics;
+      if (budgetAnalytics?.budget_alerts) {
+        budgetAnalytics.budget_alerts.forEach(alert => {
+          if (alert.percentage >= 90) {
+            scheduleBudgetAlert(alert.category, alert.percentage, alert.limit, alert.spent);
+          }
+        });
+      }
+    }
+  }, [currentUser, dashboardData, notificationSettings, scheduleBudgetAlert]);
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'profile-selection':
