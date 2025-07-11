@@ -432,7 +432,33 @@ function App() {
 
   return (
     <div className="App">
-      {renderCurrentView()}
+      {/* Mobile Header */}
+      {shouldShowMobileHeader() && (
+        <MobileHeader 
+          title={getPageTitle()}
+          onBack={currentView !== 'dashboard' ? () => setCurrentView('dashboard') : null}
+          actions={[
+            {
+              icon: '🔔',
+              onClick: () => setCurrentView('notification-settings')
+            }
+          ]}
+        />
+      )}
+
+      {/* Main Content */}
+      <div className={`main-content ${isMobile ? 'mobile' : ''}`}>
+        {renderCurrentView()}
+      </div>
+
+      {/* Mobile Navigation */}
+      {shouldShowMobileNav() && (
+        <MobileNavigation 
+          currentView={currentView}
+          onViewChange={setCurrentView}
+          user={currentUser}
+        />
+      )}
       
       {/* Notification Permission Banner */}
       {isSupported && permission === 'default' && (
