@@ -278,13 +278,30 @@ function App() {
     setActiveNotifications(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleEnableNotifications = async () => {
-    try {
-      await requestPermission();
-      setActiveNotifications([]);
-    } catch (error) {
-      console.error('Error enabling notifications:', error);
-    }
+  const getPageTitle = () => {
+    const titles = {
+      'dashboard': '🏠 Dashboard',
+      'timeline': '🌊 Marea de Tiempo',
+      'advanced-budget': '💰 Presupuesto Avanzado',
+      'notification-settings': '🔔 Notificaciones',
+      'create-ancla': '⚓ Nueva Ancla',
+      'create-habit': '📊 Nuevo Hábito',
+      'create-objective': '🎯 Nuevo Objetivo',
+      'create-transaction': '💸 Nueva Transacción',
+      'create-diary': '📔 Nueva Entrada',
+      'create-budget-limit': '🎯 Nuevo Límite',
+      'create-savings-goal': '🏦 Nueva Meta',
+      'add-money': '💰 Añadir Dinero'
+    };
+    return titles[currentView] || '⚓ Anclora';
+  };
+
+  const shouldShowMobileHeader = () => {
+    return isMobile && currentView !== 'profile-selection';
+  };
+
+  const shouldShowMobileNav = () => {
+    return isMobile && currentUser && ['dashboard', 'timeline', 'advanced-budget', 'notification-settings'].includes(currentView);
   };
 
   const renderCurrentView = () => {
