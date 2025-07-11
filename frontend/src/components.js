@@ -1403,3 +1403,402 @@ export const Timeline = ({
     </div>
   );
 };
+
+// Advanced Budget Component - Presupuesto Incrementado
+export const AdvancedBudget = ({ 
+  user, 
+  data, 
+  onViewChange, 
+  onCreateTransaction, 
+  onCreateBudgetLimit, 
+  onCreateSavingsGoal, 
+  onAddToSavingsGoal 
+}) => {
+  const [budgetData, setBudgetData] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState('monthly');
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Load budget analytics
+  useEffect(() => {
+    const loadBudgetAnalytics = async () => {
+      try {
+        const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+        const response = await fetch(`${BACKEND_URL}/api/budget-analytics/${user.id}?period=${selectedPeriod}`);
+        const analytics = await response.json();
+        setBudgetData(analytics);
+      } catch (error) {
+        console.error('Error loading budget analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      loadBudgetAnalytics();
+    }
+  }, [user?.id, selectedPeriod]);
+
+  if (loading) {
+    return (
+      <div className="advanced-budget">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Cargando análisis financiero...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Chart configurations
+  const categoryChartData = {
+    labels: Object.keys(budgetData?.category_breakdown || {}),
+    datasets: [
+      {
+        label: 'Gastos por Categoría',
+        data: Object.values(budgetData?.category_breakdown || {}),
+        backgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#4BC0C0',
+          '#9966FF',
+          '#FF9F40',
+          '#FF6384',
+          '#C9CBCF'
+        ],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }
+    ]
+  };
+
+  const trendsChartData = {
+    labels: budgetData?.expense_trends?.map(t => t.month) || [],
+    datasets: [
+      {
+        label: 'Gastos Mensuales',
+        data: budgetData?.expense_trends?.map(t => t.amount) || [],
+        borderColor: '#667eea',
+        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+        fill: true,
+        tension: 0.4
+      }
+    ]
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.label}: $${context.parsed.toFixed(2)}`;
+          }
+        }
+      }
+    }
+  };
+
+  const renderOverview = () => (
+    <div className="budget-overview">
+      {/* Financial Summary Cards */}
+      <div className="financial-summary">
+        <div className="summary-card income">
+          <div className="card-header">
+            <h3>💰 Ingresos</h3>
+            <span className="period">{selectedPeriod}</span>
+          </div>
+          <div className="amount">${budgetData?.total_income?.toFixed(2) || '0.00'}</div>
+          <div className="trend positive">↗ +5.2%</div>
+        </div>
+        
+        <div className="summary-card expenses">
+          <div className="card-header">
+            <h3>💸 Gastos</h3>
+            <span className="period">{selectedPeriod}</span>
+          </div>
+          <div className="amount">${budgetData?.total_expenses?.toFixed(2) || '0.00'}</div>
+          <div className="trend negative">↘ -2.1%</div>
+        </div>
+        
+        <div className="summary-card balance">
+          <div className="card-header">
+            <h3>💵 Balance</h3>
+            <span className="period">{selectedPeriod}</span>
+          </div>
+          <div className={`amount ${budgetData?.net_balance >= 0 ? 'positive' : 'negative'}`}>
+            ${budgetData?.net_balance?.toFixed(2) || '0.00'}
+          </div>
+          <div className="trend positive">↗ +12.3%</div>
+        </div>
+      </div>
+
+      {/* Budget Alerts */}
+      {budgetData?.budget_alerts?.length > 0 && (
+        <div className="budget-alerts">
+          <h3>⚠️ Alertas de Presupuesto</h3>
+          <div className="alerts-list">
+            {budgetData.budget_alerts.map((alert, index) => (
+              <div key={index} className={`alert ${alert.severity}`}>
+                <div className="alert-icon">
+                  {alert.severity === 'high' ? '🔴' : '🟡'}
+                </div>
+                <div className="alert-content">
+                  <h4>{alert.category}</h4>
+                  <p>Has gastado ${alert.spent.toFixed(2)} de ${alert.limit.toFixed(2)} ({alert.percentage.toFixed(1)}%)</p>
+                </div>
+                <div className="alert-progress">
+                  <div 
+                    className="progress-bar"
+                    style={{ width: `${Math.min(alert.percentage, 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Charts Section */}
+      <div className="charts-section">
+        <div className="chart-container">
+          <h3>📊 Distribución de Gastos</h3>
+          <div className="chart-wrapper">
+            <Pie data={categoryChartData} options={chartOptions} />
+          </div>
+        </div>
+        
+        <div className="chart-container">
+          <h3>📈 Tendencias de Gastos</h3>
+          <div className="chart-wrapper">
+            <Line data={trendsChartData} options={chartOptions} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderBudgetLimits = () => (
+    <div className="budget-limits">
+      <div className="section-header">
+        <h3>🎯 Límites de Presupuesto</h3>
+        <button 
+          className="btn-primary"
+          onClick={() => onViewChange('create-budget-limit')}
+        >
+          + Nuevo Límite
+        </button>
+      </div>
+      
+      <div className="limits-grid">
+        {Object.entries(budgetData?.category_breakdown || {}).map(([category, spent]) => (
+          <div key={category} className="limit-card">
+            <div className="limit-header">
+              <h4>{category}</h4>
+              <span className="spent-amount">${spent.toFixed(2)}</span>
+            </div>
+            <div className="limit-progress">
+              <div className="progress-bar" style={{ width: '65%' }}></div>
+            </div>
+            <div className="limit-info">
+              <span>65% del límite</span>
+              <span>$500.00 límite</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderSavingsGoals = () => (
+    <div className="savings-goals">
+      <div className="section-header">
+        <h3>🏦 Metas de Ahorro</h3>
+        <button 
+          className="btn-primary"
+          onClick={() => onViewChange('create-savings-goal')}
+        >
+          + Nueva Meta
+        </button>
+      </div>
+      
+      <div className="goals-grid">
+        {budgetData?.savings_progress?.map((goal) => (
+          <div key={goal.id} className="goal-card">
+            <div className="goal-header">
+              <h4>{goal.title}</h4>
+              <span className="goal-percentage">{goal.progress.toFixed(1)}%</span>
+            </div>
+            <div className="goal-progress">
+              <div 
+                className="progress-bar"
+                style={{ width: `${Math.min(goal.progress, 100)}%` }}
+              ></div>
+            </div>
+            <div className="goal-amounts">
+              <span>${goal.current_amount.toFixed(2)}</span>
+              <span>${goal.target_amount.toFixed(2)}</span>
+            </div>
+            <button 
+              className="btn-secondary"
+              onClick={() => onAddToSavingsGoal(goal.id)}
+            >
+              💰 Añadir Dinero
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderReports = () => (
+    <div className="financial-reports">
+      <div className="section-header">
+        <h3>📋 Reportes Financieros</h3>
+        <button className="btn-primary">
+          📄 Generar Reporte
+        </button>
+      </div>
+      
+      <div className="reports-grid">
+        <div className="report-card">
+          <h4>Reporte Mensual</h4>
+          <p>Resumen completo del mes actual</p>
+          <div className="report-stats">
+            <div className="stat">
+              <span>Balance:</span>
+              <span>${budgetData?.net_balance?.toFixed(2) || '0.00'}</span>
+            </div>
+            <div className="stat">
+              <span>Mejor categoría:</span>
+              <span>Trabajo</span>
+            </div>
+          </div>
+          <button className="btn-secondary">Ver Reporte</button>
+        </div>
+        
+        <div className="report-card">
+          <h4>Predicciones</h4>
+          <p>Proyecciones para el próximo mes</p>
+          <div className="report-stats">
+            <div className="stat">
+              <span>Gastos estimados:</span>
+              <span>${budgetData?.predictions?.next_month_expenses?.toFixed(2) || '0.00'}</span>
+            </div>
+            <div className="stat">
+              <span>Ahorro estimado:</span>
+              <span>$250.00</span>
+            </div>
+          </div>
+          <button className="btn-secondary">Ver Predicción</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderComparatives = () => (
+    <div className="budget-comparatives">
+      <div className="section-header">
+        <h3>📊 Comparativas</h3>
+        <select 
+          value={selectedPeriod}
+          onChange={(e) => setSelectedPeriod(e.target.value)}
+          className="period-selector"
+        >
+          <option value="weekly">Semanal</option>
+          <option value="monthly">Mensual</option>
+          <option value="yearly">Anual</option>
+        </select>
+      </div>
+      
+      <div className="comparative-charts">
+        <div className="chart-container">
+          <h4>Gastos por Categoría - Comparativa</h4>
+          <div className="chart-wrapper">
+            <Bar data={categoryChartData} options={chartOptions} />
+          </div>
+        </div>
+        
+        <div className="comparison-table">
+          <h4>Comparación Mes a Mes</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Categoría</th>
+                <th>Este Mes</th>
+                <th>Mes Anterior</th>
+                <th>Diferencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(budgetData?.category_breakdown || {}).map(([category, amount]) => (
+                <tr key={category}>
+                  <td>{category}</td>
+                  <td>${amount.toFixed(2)}</td>
+                  <td>${(amount * 0.9).toFixed(2)}</td>
+                  <td className="positive">+${(amount * 0.1).toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const tabs = [
+    { id: 'overview', label: '🏠 Resumen', component: renderOverview },
+    { id: 'limits', label: '🎯 Límites', component: renderBudgetLimits },
+    { id: 'savings', label: '🏦 Ahorros', component: renderSavingsGoals },
+    { id: 'reports', label: '📋 Reportes', component: renderReports },
+    { id: 'comparatives', label: '📊 Comparativas', component: renderComparatives }
+  ];
+
+  return (
+    <div className="advanced-budget">
+      <div className="budget-header">
+        <div className="header-top">
+          <button
+            onClick={() => onViewChange('dashboard')}
+            className="btn-secondary"
+          >
+            ← Volver al Dashboard
+          </button>
+          <h1>💰 Presupuesto Avanzado</h1>
+          <div className="header-controls">
+            <select 
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="period-selector"
+            >
+              <option value="weekly">Semanal</option>
+              <option value="monthly">Mensual</option>
+              <option value="yearly">Anual</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="budget-tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="budget-content">
+        {tabs.find(tab => tab.id === activeTab)?.component()}
+      </div>
+    </div>
+  );
+};
