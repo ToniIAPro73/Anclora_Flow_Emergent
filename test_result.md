@@ -150,6 +150,54 @@ backend:
         agent: "testing"
         comment: "Todos los endpoints del dashboard funcionan correctamente. Se ha implementado una función para convertir ObjectId a string para evitar problemas de serialización."
 
+  - task: "Advanced Budget Analytics Endpoints"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Budget analytics endpoints funcionando correctamente. GET /api/budget-analytics/{user_id} con parámetros de período (weekly, monthly, yearly) devuelve estructura completa con totales, desglose por categorías, tendencias, alertas y predicciones. Integración correcta con datos de transacciones existentes."
+
+  - task: "Budget Limits Management Endpoints"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Budget limits endpoints funcionando correctamente. POST /api/budget-limits para crear límites, GET /api/budget-limits/{user_id} para obtener límites, PUT /api/budget-limits/{limit_id} para actualizar. Se corrigió problema de serialización de ObjectId. Validación y manejo de errores funcionando correctamente."
+
+  - task: "Savings Goals Management Endpoints"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Savings goals endpoints funcionando correctamente. POST /api/savings-goals para crear metas, GET /api/savings-goals/{user_id} para obtener metas, PUT /api/savings-goals/{goal_id}/add-money para agregar dinero. Se corrigió problema de serialización de fechas (target_date). Manejo correcto de tipos de datos y validaciones."
+
+  - task: "Financial Reports Generation Endpoints"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Financial reports endpoints funcionando correctamente. GET /api/financial-reports/{user_id} con diferentes tipos de reporte (weekly, monthly, yearly). Generación correcta de reportes con cálculos precisos, desglose por categorías, tendencias y persistencia de datos. Serialización de fechas funcionando correctamente."
+
 frontend:
   - task: "Estructura base con autenticación y selección de perfil"
     implemented: true
