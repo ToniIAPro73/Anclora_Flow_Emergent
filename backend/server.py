@@ -588,9 +588,15 @@ async def get_transactions(user_id: str):
 async def create_diary_entry(entry: DiaryEntryCreate, user_id: str):
     entry_dict = entry.dict()
     entry_dict["user_id"] = user_id
-    entry_dict["date"] = date.today()
+    entry_dict["date"] = date.today().isoformat()  # Convert date to string
     entry_obj = DiaryEntry(**entry_dict)
-    await db.diary_entries.insert_one(entry_obj.dict())
+    
+    # Convert the DiaryEntry object to dict and handle date serialization
+    diary_dict = entry_obj.dict()
+    if isinstance(diary_dict.get("date"), date):
+        diary_dict["date"] = diary_dict["date"].isoformat()
+    
+    await db.diary_entries.insert_one(diary_dict)
     return entry_obj
 
 @api_router.get("/diary/{user_id}")
