@@ -291,6 +291,7 @@ test_plan:
     - "Estructura base con autenticación y selección de perfil"
     - "Dashboard principal con componentes marítimos"
     - "Timeline interactivo (Marea de Tiempo) con drag-and-drop"
+    - "Presupuesto Incrementado - Análisis Visual, Límites, Metas, Reportes, Comparativas y Predicciones"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
