@@ -193,6 +193,60 @@ class DiaryEntry(BaseModel):
     date: date
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+# Budget Models
+class BudgetLimit(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    category: str
+    limit_amount: float
+    current_amount: float = 0.0
+    period: str = "monthly"  # monthly, weekly, yearly
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class BudgetLimitCreate(BaseModel):
+    category: str
+    limit_amount: float
+    period: str = "monthly"
+
+class SavingsGoal(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    title: str
+    target_amount: float
+    current_amount: float = 0.0
+    target_date: date
+    description: str = ""
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class SavingsGoalCreate(BaseModel):
+    title: str
+    target_amount: float
+    target_date: date
+    description: str = ""
+
+class FinancialReport(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    report_type: str  # weekly, monthly, yearly
+    period_start: date
+    period_end: date
+    total_income: float
+    total_expenses: float
+    net_balance: float
+    category_breakdown: Dict[str, float]
+    trends: Dict[str, Any]
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class BudgetAnalytics(BaseModel):
+    total_income: float
+    total_expenses: float
+    net_balance: float
+    category_breakdown: Dict[str, float]
+    expense_trends: List[Dict[str, Any]]
+    budget_alerts: List[Dict[str, Any]]
+    savings_progress: List[Dict[str, Any]]
+    predictions: Dict[str, Any]
+
 class DiaryEntryCreate(BaseModel):
     content: str
     mood: Mood
