@@ -209,6 +209,7 @@ test_plan:
   current_focus:
     - "Estructura base con autenticación y selección de perfil"
     - "Dashboard principal con componentes marítimos"
+    - "Timeline interactivo (Marea de Tiempo) con drag-and-drop"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
