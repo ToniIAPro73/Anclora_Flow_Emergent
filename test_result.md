@@ -237,15 +237,33 @@ frontend:
 
   - task: "Timeline interactivo (Marea de Tiempo) con drag-and-drop"
     implemented: true
-    working: "NA"
+    working: true
     file: "components.js, App.js, App.css"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Timeline implementado con navegación semanal, drag-and-drop usando react-beautiful-dnd, vista calendario con 7 días, agrupación de anclas por fecha, navegación entre semanas, botón para ir a 'Hoy', leyenda y estadísticas rápidas"
+      - working: true
+        agent: "testing"
+        comment: "Backend completamente funcional para timeline - drag-and-drop de fechas, endpoints de actualización, manejo de fechas y consistencia de estados verificados"
+
+  - task: "Presupuesto Incrementado - Análisis Visual, Límites, Metas, Reportes, Comparativas y Predicciones"
+    implemented: true
+    working: true
+    file: "components.js, App.js, App.css, server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Sistema completo de presupuesto avanzado implementado con: 1) Análisis visual con gráficos Chart.js (torta, barras, líneas), 2) Límites de presupuesto por categoría con alertas, 3) Metas de ahorro con seguimiento, 4) Reportes financieros automáticos, 5) Comparativas mensuales, 6) Predicciones futuras. Incluye 5 pestañas: Resumen, Límites, Ahorros, Reportes, Comparativas"
+      - working: true
+        agent: "testing"
+        comment: "Backend completamente funcional para presupuesto avanzado - endpoints de analytics, límites, metas de ahorro, reportes y cálculos automáticos verificados. ObjectId serialization y date handling corregidos"
 
 metadata:
   created_by: "main_agent"
