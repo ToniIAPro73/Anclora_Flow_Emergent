@@ -378,7 +378,15 @@ export const Dashboard = ({
 
         {/* Presupuesto */}
         <div className="dashboard-section">
-          <h3>💰 Presupuesto</h3>
+          <div className="section-header">
+            <h3>💰 Presupuesto</h3>
+            <button
+              onClick={() => onViewChange('advanced-budget')}
+              className="btn-primary"
+            >
+              📊 Ver Análisis Completo
+            </button>
+          </div>
           <div className="space-y-3">
             {data?.transactions?.slice(0, 5).map((transaction) => (
               <div key={transaction.id} className="transaction-item">
