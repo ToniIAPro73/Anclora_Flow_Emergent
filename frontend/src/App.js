@@ -33,6 +33,18 @@ function App() {
   const [selectedGoalTitle, setSelectedGoalTitle] = useState('');
   const [notificationSettings, setNotificationSettings] = useState({});
   const [activeNotifications, setActiveNotifications] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Initialize notifications hook
   const {
