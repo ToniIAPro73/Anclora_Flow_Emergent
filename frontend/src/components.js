@@ -2332,3 +2332,27 @@ export const AdvancedBudget = ({
     </div>
   );
 };
+
+// Notification Toast Component
+export const NotificationToast = ({ notifications, onDismiss }) => {
+  if (!notifications || notifications.length === 0) return null;
+
+  return (
+    <div className="notification-toast-container">
+      {notifications.map((notification, index) => (
+        <div key={index} className="notification-toast">
+          <div className="toast-content">
+            <div className="toast-title">{notification.title}</div>
+            <div className="toast-body">{notification.body}</div>
+          </div>
+          <button
+            onClick={() => onDismiss(index)}
+            className="toast-dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+};
