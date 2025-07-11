@@ -219,3 +219,5 @@ agent_communication:
     message: "Implementación inicial completa - Estructura base creada, dashboard funcional, formularios implementados. Servicios corriendo correctamente. Listo para testing."
   - agent: "testing"
     message: "Se han completado las pruebas de todos los endpoints del backend. Se encontró y corrigió un problema con la serialización de ObjectId en MongoDB. Todos los endpoints están funcionando correctamente. Se ha creado un archivo backend_test.py completo que prueba todos los endpoints requeridos."
+  - agent: "main"
+    message: "Timeline interactivo (Marea de Tiempo) implementado exitosamente. Características: navegación semanal, drag-and-drop con react-beautiful-dnd, vista calendario de 7 días, agrupación de anclas por fecha, navegación entre semanas, botón 'Hoy', leyenda y estadísticas. CSS personalizado añadido para tema marítimo. Componente integrado con Dashboard y App.js. Listo para testing."
