@@ -151,6 +151,294 @@ export const ProfileSelection = ({ onProfileSelect, loading }) => {
   );
 };
 
+// Notifications Settings Component
+export const NotificationSettings = ({ user, onViewChange, onSaveSettings }) => {
+  const [settings, setSettings] = useState({
+    budget_alerts: true,
+    ancla_reminders: true,
+    savings_goals: true,
+    habit_reminders: true,
+    reminder_time: 30, // minutes before
+    habit_time: '09:00',
+    daily_summary: true,
+    weekly_report: true
+  });
+  const [permission, setPermission] = useState(Notification.permission);
+
+  const requestNotificationPermission = async () => {
+    try {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      
+      if (result === 'granted') {
+        // Test notification
+        new Notification('⚓ Anclora', {
+          body: '¡Notificaciones activadas correctamente!',
+          icon: '/favicon.ico'
+        });
+      }
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+    }
+  };
+
+  const handleSettingChange = (setting, value) => {
+    const newSettings = { ...settings, [setting]: value };
+    setSettings(newSettings);
+  };
+
+  const handleSave = () => {
+    onSaveSettings(settings);
+    onViewChange('dashboard');
+  };
+
+  const testNotification = (type) => {
+    if (permission !== 'granted') {
+      alert('Primero debes permitir las notificaciones');
+      return;
+    }
+
+    const notifications = {
+      budget: {
+        title: '⚠️ Alerta de Presupuesto (Prueba)',
+        body: 'Has superado el 90% de tu límite en "Alimentación"'
+      },
+      ancla: {
+        title: '⚓ Recordatorio de Ancla (Prueba)',
+        body: 'Tienes una tarea que comienza en 30 minutos'
+      },
+      savings: {
+        title: '🏦 Meta de Ahorro (Prueba)',
+        body: 'Has alcanzado el 75% de tu meta "Vacaciones"'
+      },
+      habit: {
+        title: '📊 Recordatorio de Hábito (Prueba)',
+        body: 'Es hora de "Ejercicio diario". ¡Mantén tu racha!'
+      }
+    };
+
+    const notification = notifications[type];
+    new Notification(notification.title, {
+      body: notification.body,
+      icon: '/favicon.ico'
+    });
+  };
+
+  return (
+    <div className="notification-settings">
+      <div className="settings-header">
+        <button
+          onClick={() => onViewChange('dashboard')}
+          className="btn-secondary"
+        >
+          ← Volver al Dashboard
+        </button>
+        <h1 className="text-2xl font-bold text-gray-800">
+          🔔 Configuración de Notificaciones
+        </h1>
+      </div>
+
+      <div className="settings-content">
+        {/* Permission Status */}
+        <div className="permission-section">
+          <h3>Estado de Permisos</h3>
+          <div className="permission-status">
+            <div className={`status-indicator ${permission === 'granted' ? 'granted' : 'denied'}`}>
+              {permission === 'granted' ? '✅' : '❌'} 
+              {permission === 'granted' ? 'Permitido' : 
+               permission === 'denied' ? 'Denegado' : 'No solicitado'}
+            </div>
+            {permission !== 'granted' && (
+              <button
+                onClick={requestNotificationPermission}
+                className="btn-primary"
+              >
+                Permitir Notificaciones
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Budget Alerts */}
+        <div className="setting-group">
+          <div className="setting-item">
+            <div className="setting-info">
+              <h4>⚠️ Alertas de Presupuesto</h4>
+              <p>Recibe notificaciones cuando te acerques a tus límites de gasto</p>
+            </div>
+            <div className="setting-controls">
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.budget_alerts}
+                  onChange={(e) => handleSettingChange('budget_alerts', e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+              <button
+                onClick={() => testNotification('budget')}
+                className="btn-secondary btn-small"
+                disabled={permission !== 'granted'}
+              >
+                Probar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Ancla Reminders */}
+        <div className="setting-group">
+          <div className="setting-item">
+            <div className="setting-info">
+              <h4>⚓ Recordatorios de Anclas</h4>
+              <p>Recibe recordatorios antes de que comiencen tus tareas</p>
+            </div>
+            <div className="setting-controls">
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.ancla_reminders}
+                  onChange={(e) => handleSettingChange('ancla_reminders', e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+              <button
+                onClick={() => testNotification('ancla')}
+                className="btn-secondary btn-small"
+                disabled={permission !== 'granted'}
+              >
+                Probar
+              </button>
+            </div>
+          </div>
+          
+          {settings.ancla_reminders && (
+            <div className="setting-sub-item">
+              <label>Recordar con:</label>
+              <select
+                value={settings.reminder_time}
+                onChange={(e) => handleSettingChange('reminder_time', parseInt(e.target.value))}
+                className="form-select"
+              >
+                <option value={10}>10 minutos de anticipación</option>
+                <option value={30}>30 minutos de anticipación</option>
+                <option value={60}>1 hora de anticipación</option>
+                <option value={1440}>1 día de anticipación</option>
+              </select>
+            </div>
+          )}
+        </div>
+
+        {/* Savings Goals */}
+        <div className="setting-group">
+          <div className="setting-item">
+            <div className="setting-info">
+              <h4>🏦 Metas de Ahorro</h4>
+              <p>Recibe actualizaciones sobre el progreso de tus metas</p>
+            </div>
+            <div className="setting-controls">
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.savings_goals}
+                  onChange={(e) => handleSettingChange('savings_goals', e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+              <button
+                onClick={() => testNotification('savings')}
+                className="btn-secondary btn-small"
+                disabled={permission !== 'granted'}
+              >
+                Probar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Habit Reminders */}
+        <div className="setting-group">
+          <div className="setting-item">
+            <div className="setting-info">
+              <h4>📊 Recordatorios de Hábitos</h4>
+              <p>Recibe recordatorios diarios para mantener tus hábitos</p>
+            </div>
+            <div className="setting-controls">
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.habit_reminders}
+                  onChange={(e) => handleSettingChange('habit_reminders', e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+              <button
+                onClick={() => testNotification('habit')}
+                className="btn-secondary btn-small"
+                disabled={permission !== 'granted'}
+              >
+                Probar
+              </button>
+            </div>
+          </div>
+          
+          {settings.habit_reminders && (
+            <div className="setting-sub-item">
+              <label>Hora del recordatorio:</label>
+              <input
+                type="time"
+                value={settings.habit_time}
+                onChange={(e) => handleSettingChange('habit_time', e.target.value)}
+                className="form-input"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Reports */}
+        <div className="setting-group">
+          <div className="setting-item">
+            <div className="setting-info">
+              <h4>📋 Reportes Automáticos</h4>
+              <p>Recibe resúmenes automáticos de tu progreso</p>
+            </div>
+            <div className="setting-controls">
+              <div className="checkbox-group">
+                <label className="checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={settings.daily_summary}
+                    onChange={(e) => handleSettingChange('daily_summary', e.target.checked)}
+                  />
+                  Resumen diario
+                </label>
+                <label className="checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={settings.weekly_report}
+                    onChange={(e) => handleSettingChange('weekly_report', e.target.checked)}
+                  />
+                  Reporte semanal
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="settings-actions">
+          <button
+            onClick={handleSave}
+            className="btn-primary"
+          >
+            💾 Guardar Configuración
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Dashboard Component
 export const Dashboard = ({ 
   user, 
