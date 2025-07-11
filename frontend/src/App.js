@@ -349,6 +349,14 @@ function App() {
             goalTitle={selectedGoalTitle}
           />
         );
+      case 'notification-settings':
+        return (
+          <NotificationSettings 
+            user={currentUser}
+            onViewChange={setCurrentView}
+            onSaveSettings={handleSaveNotificationSettings}
+          />
+        );
       default:
         return <div>Vista no encontrada</div>;
     }
