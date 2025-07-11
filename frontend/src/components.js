@@ -1144,6 +1144,233 @@ export const DiaryForm = ({ onSubmit, onCancel }) => {
   );
 };
 
+// Budget Limit Form Component
+export const BudgetLimitForm = ({ onSubmit, onCancel, userProfile }) => {
+  const [formData, setFormData] = useState({
+    category: '',
+    limit_amount: '',
+    period: 'monthly'
+  });
+
+  const predefinedCategories = {
+    content_creator: ['Equipo', 'Marketing', 'Suscripciones', 'Educación'],
+    freelancer: ['Herramientas', 'Marketing', 'Oficina', 'Capacitación'],
+    student: ['Libros', 'Transporte', 'Alimentación', 'Entretenimiento'],
+    professional: ['Transporte', 'Alimentación', 'Ropa', 'Entretenimiento']
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({
+      ...formData,
+      limit_amount: parseFloat(formData.limit_amount)
+    });
+  };
+
+  return (
+    <div className="form-container">
+      <form onSubmit={handleSubmit} className="form-card">
+        <h2 className="text-2xl font-bold mb-6 text-center">🎯 Nuevo Límite de Presupuesto</h2>
+        
+        <div className="form-group">
+          <label className="form-label">Categoría</label>
+          <select
+            value={formData.category}
+            onChange={(e) => setFormData({...formData, category: e.target.value})}
+            className="form-select"
+            required
+          >
+            <option value="">Selecciona una categoría</option>
+            {predefinedCategories[userProfile]?.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Límite de Gasto</label>
+          <input
+            type="number"
+            step="0.01"
+            value={formData.limit_amount}
+            onChange={(e) => setFormData({...formData, limit_amount: e.target.value})}
+            className="form-input"
+            placeholder="0.00"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Período</label>
+          <select
+            value={formData.period}
+            onChange={(e) => setFormData({...formData, period: e.target.value})}
+            className="form-select"
+          >
+            <option value="weekly">Semanal</option>
+            <option value="monthly">Mensual</option>
+            <option value="yearly">Anual</option>
+          </select>
+        </div>
+
+        <div className="form-actions">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="btn-secondary"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="btn-primary"
+          >
+            🎯 Crear Límite
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// Savings Goal Form Component
+export const SavingsGoalForm = ({ onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    target_amount: '',
+    target_date: '',
+    description: ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({
+      ...formData,
+      target_amount: parseFloat(formData.target_amount)
+    });
+  };
+
+  return (
+    <div className="form-container">
+      <form onSubmit={handleSubmit} className="form-card">
+        <h2 className="text-2xl font-bold mb-6 text-center">🏦 Nueva Meta de Ahorro</h2>
+        
+        <div className="form-group">
+          <label className="form-label">Título de la Meta</label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData({...formData, title: e.target.value})}
+            className="form-input"
+            placeholder="Ej: Vacaciones de verano"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Cantidad Objetivo</label>
+          <input
+            type="number"
+            step="0.01"
+            value={formData.target_amount}
+            onChange={(e) => setFormData({...formData, target_amount: e.target.value})}
+            className="form-input"
+            placeholder="0.00"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Fecha Objetivo</label>
+          <input
+            type="date"
+            value={formData.target_date}
+            onChange={(e) => setFormData({...formData, target_date: e.target.value})}
+            className="form-input"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Descripción</label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="form-textarea"
+            placeholder="Describe tu meta de ahorro..."
+            rows="3"
+          />
+        </div>
+
+        <div className="form-actions">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="btn-secondary"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="btn-primary"
+          >
+            🏦 Crear Meta
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// Add Money to Savings Form Component
+export const AddMoneyForm = ({ onSubmit, onCancel, goalTitle }) => {
+  const [amount, setAmount] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(parseFloat(amount));
+  };
+
+  return (
+    <div className="form-container">
+      <form onSubmit={handleSubmit} className="form-card">
+        <h2 className="text-2xl font-bold mb-6 text-center">💰 Añadir Dinero</h2>
+        
+        <div className="form-group">
+          <label className="form-label">Meta: {goalTitle}</label>
+          <input
+            type="number"
+            step="0.01"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="form-input"
+            placeholder="Cantidad a añadir"
+            required
+          />
+        </div>
+
+        <div className="form-actions">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="btn-secondary"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="btn-primary"
+          >
+            💰 Añadir
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 // Timeline Component - Marea de Tiempo
 export const Timeline = ({ 
   user, 
