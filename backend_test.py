@@ -25,14 +25,24 @@ logger.info(f"Using API URL: {API_URL}")
 
 class AncloraBackendTest(unittest.TestCase):
     
+    # Class-level variables to persist data across test methods
+    user_ids = {}
+    category_ids = {}
+    ancla_ids = {}
+    habit_ids = {}
+    objective_ids = {}
+    transaction_ids = {}
+    diary_ids = {}
+    
     def setUp(self):
-        self.user_ids = {}
-        self.category_ids = {}
-        self.ancla_ids = {}
-        self.habit_ids = {}
-        self.objective_ids = {}
-        self.transaction_ids = {}
-        self.diary_ids = {}
+        # Keep instance variables for backward compatibility
+        self.user_ids = AncloraBackendTest.user_ids
+        self.category_ids = AncloraBackendTest.category_ids
+        self.ancla_ids = AncloraBackendTest.ancla_ids
+        self.habit_ids = AncloraBackendTest.habit_ids
+        self.objective_ids = AncloraBackendTest.objective_ids
+        self.transaction_ids = AncloraBackendTest.transaction_ids
+        self.diary_ids = AncloraBackendTest.diary_ids
     
     def test_01_create_users_with_profiles(self):
         """Test creating users with different profiles and verify predefined data generation"""
