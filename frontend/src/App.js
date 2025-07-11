@@ -30,6 +30,7 @@ function App() {
   const [selectedGoalId, setSelectedGoalId] = useState(null);
   const [selectedGoalTitle, setSelectedGoalTitle] = useState('');
   const [notificationSettings, setNotificationSettings] = useState({});
+  const [activeNotifications, setActiveNotifications] = useState([]);
 
   // Initialize notifications hook
   const {
@@ -41,6 +42,19 @@ function App() {
     scheduleSavingsGoalUpdate,
     scheduleHabitReminder
   } = useNotifications();
+
+  // Auto-request notification permission on first load
+  useEffect(() => {
+    if (isSupported && permission === 'default') {
+      // Show a banner or prompt to enable notifications
+      const banner = {
+        title: '🔔 Habilitar Notificaciones',
+        body: 'Recibe recordatorios de tus anclas y alertas de presupuesto',
+        action: 'enable-notifications'
+      };
+      setActiveNotifications([banner]);
+    }
+  }, [isSupported, permission]);
 
   // Test API connection
   useEffect(() => {
