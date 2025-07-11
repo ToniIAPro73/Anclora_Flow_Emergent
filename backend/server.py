@@ -718,6 +718,221 @@ async def get_diary_entries(user_id: str):
     entries = convert_objectid(entries)
     return entries
 
+# Budget Limits routes
+@api_router.post("/budget-limits", response_model=BudgetLimit)
+async def create_budget_limit(limit: BudgetLimitCreate, user_id: str):
+    limit_dict = limit.dict()
+    limit_dict["user_id"] = user_id
+    limit_obj = BudgetLimit(**limit_dict)
+    await db.budget_limits.insert_one(limit_obj.dict())
+    return limit_obj
+
+@api_router.get("/budget-limits/{user_id}")
+async def get_budget_limits(user_id: str):
+    limits = await db.budget_limits.find({"user_id": user_id}).to_list(1000)
+    return limits
+
+@api_router.put("/budget-limits/{limit_id}")
+async def update_budget_limit(limit_id: str, limit: BudgetLimitCreate):
+    limit_dict = limit.dict()
+    result = await db.budget_limits.update_one({"id": limit_id}, {"$set": limit_dict})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Budget limit not found")
+    return {"message": "Budget limit updated successfully"}
+
+# Savings Goals routes
+@api_router.post("/savings-goals", response_model=SavingsGoal)
+async def create_savings_goal(goal: SavingsGoalCreate, user_id: str):
+    goal_dict = goal.dict()
+    goal_dict["user_id"] = user_id
+    if isinstance(goal_dict.get("target_date"), date):
+        goal_dict["target_date"] = goal_dict["target_date"].isoformat()
+    goal_obj = SavingsGoal(**goal_dict)
+    await db.savings_goals.insert_one(goal_obj.dict())
+    return goal_obj
+
+@api_router.get("/savings-goals/{user_id}")
+async def get_savings_goals(user_id: str):
+    goals = await db.savings_goals.find({"user_id": user_id}).to_list(1000)
+    return goals
+
+@api_router.put("/savings-goals/{goal_id}/add-money")
+async def add_money_to_savings_goal(goal_id: str, amount: float):
+    goal = await db.savings_goals.find_one({"id": goal_id})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Savings goal not found")
+    
+    new_amount = goal.get("current_amount", 0) + amount
+    result = await db.savings_goals.update_one(
+        {"id": goal_id}, 
+        {"$set": {"current_amount": new_amount}}
+    )
+    return {"message": "Money added to savings goal", "new_amount": new_amount}
+
+# Budget Analytics routes
+@api_router.get("/budget-analytics/{user_id}")
+async def get_budget_analytics(user_id: str, period: str = "monthly"):
+    """Get comprehensive budget analytics"""
+    from datetime import datetime, timedelta
+    
+    # Calculate date range based on period
+    end_date = datetime.now()
+    if period == "weekly":
+        start_date = end_date - timedelta(weeks=1)
+    elif period == "monthly":
+        start_date = end_date - timedelta(days=30)
+    elif period == "yearly":
+        start_date = end_date - timedelta(days=365)
+    else:
+        start_date = end_date - timedelta(days=30)
+    
+    # Get transactions for the period
+    transactions = await db.transactions.find({
+        "user_id": user_id,
+        "created_at": {"$gte": start_date, "$lte": end_date}
+    }).to_list(1000)
+    
+    # Get budget limits
+    budget_limits = await db.budget_limits.find({"user_id": user_id}).to_list(1000)
+    
+    # Get savings goals
+    savings_goals = await db.savings_goals.find({"user_id": user_id}).to_list(1000)
+    
+    # Calculate analytics
+    total_income = sum(t.get("amount", 0) for t in transactions if t.get("type") == "income")
+    total_expenses = sum(t.get("amount", 0) for t in transactions if t.get("type") == "expense")
+    net_balance = total_income - total_expenses
+    
+    # Category breakdown
+    category_breakdown = {}
+    for transaction in transactions:
+        if transaction.get("type") == "expense":
+            category = transaction.get("category", "Sin categoría")
+            category_breakdown[category] = category_breakdown.get(category, 0) + transaction.get("amount", 0)
+    
+    # Budget alerts
+    budget_alerts = []
+    for limit in budget_limits:
+        category = limit.get("category")
+        limit_amount = limit.get("limit_amount", 0)
+        spent = category_breakdown.get(category, 0)
+        percentage = (spent / limit_amount * 100) if limit_amount > 0 else 0
+        
+        if percentage >= 90:
+            budget_alerts.append({
+                "category": category,
+                "percentage": percentage,
+                "spent": spent,
+                "limit": limit_amount,
+                "severity": "high" if percentage >= 100 else "medium"
+            })
+    
+    # Expense trends (last 6 months)
+    expense_trends = []
+    for i in range(6):
+        month_start = end_date - timedelta(days=30*(i+1))
+        month_end = end_date - timedelta(days=30*i)
+        month_transactions = await db.transactions.find({
+            "user_id": user_id,
+            "type": "expense",
+            "created_at": {"$gte": month_start, "$lte": month_end}
+        }).to_list(1000)
+        
+        month_total = sum(t.get("amount", 0) for t in month_transactions)
+        expense_trends.append({
+            "month": month_start.strftime("%Y-%m"),
+            "amount": month_total
+        })
+    
+    # Savings progress
+    savings_progress = []
+    for goal in savings_goals:
+        progress_percentage = (goal.get("current_amount", 0) / goal.get("target_amount", 1)) * 100
+        savings_progress.append({
+            "id": goal.get("id"),
+            "title": goal.get("title"),
+            "progress": progress_percentage,
+            "current_amount": goal.get("current_amount", 0),
+            "target_amount": goal.get("target_amount", 0)
+        })
+    
+    # Simple predictions (next month based on current trends)
+    avg_monthly_expense = total_expenses  # Simplified
+    predicted_next_month = avg_monthly_expense * 1.05  # 5% increase assumption
+    
+    analytics = BudgetAnalytics(
+        total_income=total_income,
+        total_expenses=total_expenses,
+        net_balance=net_balance,
+        category_breakdown=category_breakdown,
+        expense_trends=expense_trends,
+        budget_alerts=budget_alerts,
+        savings_progress=savings_progress,
+        predictions={
+            "next_month_expenses": predicted_next_month,
+            "annual_projection": predicted_next_month * 12
+        }
+    )
+    
+    return analytics
+
+@api_router.get("/financial-reports/{user_id}")
+async def generate_financial_report(user_id: str, report_type: str = "monthly"):
+    """Generate financial reports"""
+    from datetime import datetime, timedelta
+    
+    # Calculate date range
+    end_date = datetime.now()
+    if report_type == "weekly":
+        start_date = end_date - timedelta(weeks=1)
+    elif report_type == "monthly":
+        start_date = end_date - timedelta(days=30)
+    elif report_type == "yearly":
+        start_date = end_date - timedelta(days=365)
+    else:
+        start_date = end_date - timedelta(days=30)
+    
+    # Get transactions
+    transactions = await db.transactions.find({
+        "user_id": user_id,
+        "created_at": {"$gte": start_date, "$lte": end_date}
+    }).to_list(1000)
+    
+    # Calculate totals
+    total_income = sum(t.get("amount", 0) for t in transactions if t.get("type") == "income")
+    total_expenses = sum(t.get("amount", 0) for t in transactions if t.get("type") == "expense")
+    net_balance = total_income - total_expenses
+    
+    # Category breakdown
+    category_breakdown = {}
+    for transaction in transactions:
+        category = transaction.get("category", "Sin categoría")
+        category_breakdown[category] = category_breakdown.get(category, 0) + transaction.get("amount", 0)
+    
+    # Create report
+    report = FinancialReport(
+        user_id=user_id,
+        report_type=report_type,
+        period_start=start_date.date(),
+        period_end=end_date.date(),
+        total_income=total_income,
+        total_expenses=total_expenses,
+        net_balance=net_balance,
+        category_breakdown=category_breakdown,
+        trends={"growth_rate": 0.05}  # Simplified
+    )
+    
+    # Save report
+    report_dict = report.dict()
+    if isinstance(report_dict.get("period_start"), date):
+        report_dict["period_start"] = report_dict["period_start"].isoformat()
+    if isinstance(report_dict.get("period_end"), date):
+        report_dict["period_end"] = report_dict["period_end"].isoformat()
+    
+    await db.financial_reports.insert_one(report_dict)
+    
+    return report
+
 # Include the router in the main app
 app.include_router(api_router)
 
