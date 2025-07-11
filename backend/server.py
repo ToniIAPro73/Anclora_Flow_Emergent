@@ -730,6 +730,24 @@ async def create_budget_limit(limit: BudgetLimitCreate, user_id: str):
 @api_router.get("/budget-limits/{user_id}")
 async def get_budget_limits(user_id: str):
     limits = await db.budget_limits.find({"user_id": user_id}).to_list(1000)
+    
+    # Convert ObjectId to string in all limits
+    def convert_objectid(item):
+        if isinstance(item, dict):
+            for k, v in list(item.items()):
+                if isinstance(v, ObjectId):
+                    item[k] = str(v)
+                elif isinstance(v, (dict, list)):
+                    convert_objectid(v)
+        elif isinstance(item, list):
+            for i in range(len(item)):
+                if isinstance(item[i], ObjectId):
+                    item[i] = str(item[i])
+                elif isinstance(item[i], (dict, list)):
+                    convert_objectid(item[i])
+        return item
+    
+    limits = convert_objectid(limits)
     return limits
 
 @api_router.put("/budget-limits/{limit_id}")
