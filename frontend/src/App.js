@@ -28,6 +28,18 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [selectedGoalId, setSelectedGoalId] = useState(null);
   const [selectedGoalTitle, setSelectedGoalTitle] = useState('');
+  const [notificationSettings, setNotificationSettings] = useState({});
+
+  // Initialize notifications hook
+  const {
+    permission,
+    isSupported,
+    requestPermission,
+    scheduleBudgetAlert,
+    scheduleAnclaReminder,
+    scheduleSavingsGoalUpdate,
+    scheduleHabitReminder
+  } = useNotifications();
 
   // Test API connection
   useEffect(() => {
