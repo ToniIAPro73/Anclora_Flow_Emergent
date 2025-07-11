@@ -740,6 +740,247 @@ export const Dashboard = ({
   );
 };
 
+// Mobile Optimized Dashboard Component
+export const MobileDashboard = ({ 
+  user, 
+  data, 
+  onViewChange, 
+  onCompleteAncla, 
+  onTrackHabit, 
+  onToggleSubtask 
+}) => {
+  const [activeTab, setActiveTab] = useState('anclas');
+
+  const getRankEmoji = (rank) => {
+    const ranks = {
+      'grumete': '⚓',
+      'marinero': '🌊',
+      'contramaestre': '🧭',
+      'capitan': '👨‍✈️'
+    };
+    return ranks[rank] || '⚓';
+  };
+
+  const tabs = [
+    { id: 'anclas', label: 'Anclas', icon: '⚓' },
+    { id: 'habits', label: 'Hábitos', icon: '📊' },
+    { id: 'objectives', label: 'Objetivos', icon: '🎯' },
+    { id: 'budget', label: 'Dinero', icon: '💰' },
+    { id: 'diary', label: 'Diario', icon: '📔' }
+  ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'anclas':
+        return (
+          <div className="mobile-tab-content">
+            <div className="mobile-stats-grid">
+              <div className="mobile-stat-card active">
+                <div className="stat-number">{data?.anclas?.active?.length || 0}</div>
+                <div className="stat-label">Activas</div>
+              </div>
+              <div className="mobile-stat-card completed">
+                <div className="stat-number">{data?.anclas?.completed?.length || 0}</div>
+                <div className="stat-label">Completadas</div>
+              </div>
+              <div className="mobile-stat-card overdue">
+                <div className="stat-number">{data?.anclas?.overdue?.length || 0}</div>
+                <div className="stat-label">Vencidas</div>
+              </div>
+            </div>
+            
+            <div className="mobile-anclas-list">
+              {data?.anclas?.active?.slice(0, 5).map((ancla) => (
+                <div key={ancla.id} className="mobile-ancla-card">
+                  <div className="mobile-ancla-header">
+                    <span className="ancla-emoji">{ancla.emoji}</span>
+                    <div className="ancla-info">
+                      <div className="ancla-title">{ancla.title}</div>
+                      <div className="ancla-meta">
+                        {ancla.start_time} • {ancla.priority}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => onCompleteAncla(ancla.id)}
+                      className="mobile-complete-btn"
+                    >
+                      ✓
+                    </button>
+                  </div>
+                  <div className="ancla-description">{ancla.description}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'habits':
+        return (
+          <div className="mobile-tab-content">
+            {data?.habits?.map((habit) => (
+              <div key={habit.id} className="mobile-habit-card">
+                <div className="habit-header">
+                  <div className="habit-name">{habit.name}</div>
+                  <button
+                    onClick={() => onTrackHabit(habit.id)}
+                    className="mobile-track-btn"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="habit-progress-container">
+                  <div className="habit-progress-text">
+                    {habit.current_week_count}/{habit.frequency} esta semana
+                  </div>
+                  <div className="mobile-habit-progress">
+                    <div 
+                      className="habit-progress-bar"
+                      style={{ width: `${habit.completion_percentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'objectives':
+        return (
+          <div className="mobile-tab-content">
+            {data?.objectives?.map((objective) => (
+              <div key={objective.id} className="mobile-objective-card">
+                <div className="objective-header">
+                  <div className="objective-title">{objective.title}</div>
+                  <div className="objective-percentage">
+                    {objective.completion_percentage.toFixed(0)}%
+                  </div>
+                </div>
+                <div className="objective-progress-container">
+                  <div className="mobile-objective-progress">
+                    <div 
+                      className="objective-progress-bar"
+                      style={{ width: `${objective.completion_percentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="objective-subtasks">
+                  {objective.subtasks?.slice(0, 3).map((subtask, index) => (
+                    <div key={index} className="mobile-subtask">
+                      <button
+                        className={`mobile-subtask-check ${subtask.completed ? 'completed' : ''}`}
+                        onClick={() => onToggleSubtask(objective.id, index)}
+                      >
+                        {subtask.completed && '✓'}
+                      </button>
+                      <span className={subtask.completed ? 'line-through' : ''}>
+                        {subtask.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'budget':
+        return (
+          <div className="mobile-tab-content">
+            <div className="mobile-budget-summary">
+              <div className="budget-balance">
+                <div className="balance-amount">
+                  ${(data?.budget_analytics?.total_income - data?.budget_analytics?.total_expenses || 0).toFixed(2)}
+                </div>
+                <div className="balance-label">Balance del Mes</div>
+              </div>
+            </div>
+            
+            <div className="mobile-transactions">
+              {data?.transactions?.slice(0, 4).map((transaction) => (
+                <div key={transaction.id} className="mobile-transaction">
+                  <div className="transaction-info">
+                    <div className="transaction-desc">{transaction.description}</div>
+                    <div className="transaction-category">{transaction.category}</div>
+                  </div>
+                  <div className={`transaction-amount ${transaction.type}`}>
+                    {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <button
+              onClick={() => onViewChange('advanced-budget')}
+              className="mobile-action-btn primary"
+            >
+              Ver Análisis Completo
+            </button>
+          </div>
+        );
+
+      case 'diary':
+        return (
+          <div className="mobile-tab-content">
+            {data?.diary_entries?.slice(0, 3).map((entry) => (
+              <div key={entry.id} className="mobile-diary-entry">
+                <div className="diary-header">
+                  <span className="diary-mood">{entry.mood === 'happy' ? '😊' : '😐'}</span>
+                  <span className="diary-date">
+                    {new Date(entry.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="diary-content">{entry.content}</div>
+              </div>
+            ))}
+            
+            <button
+              onClick={() => onViewChange('create-diary')}
+              className="mobile-action-btn secondary"
+            >
+              + Nueva Entrada
+            </button>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="mobile-dashboard">
+      {/* Mobile User Header */}
+      <div className="mobile-user-header">
+        <div className="user-greeting">
+          <div className="greeting-text">¡Hola, {user?.name}!</div>
+          <div className="user-rank">
+            {getRankEmoji(user?.rank)} {user?.rank} • 🔥 {user?.current_streak} días
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Tab Navigation */}
+      <div className="mobile-tab-nav">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            className={`mobile-tab ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <span className="tab-icon">{tab.icon}</span>
+            <span className="tab-label">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="mobile-tab-container">
+        {renderTabContent()}
+      </div>
+    </div>
+  );
+};
+
 // Ancla Item Component
 const AnclaItem = ({ ancla, onComplete }) => {
   const formatDate = (dateString) => {
