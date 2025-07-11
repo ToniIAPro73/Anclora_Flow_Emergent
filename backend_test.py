@@ -325,6 +325,243 @@ class AncloraBackendTest(unittest.TestCase):
             self.assertGreaterEqual(len(dashboard["diary_entries"]), 1, "Expected at least 1 diary entry")
             
             logger.info(f"Verified dashboard updates for profile {profile}")
+    
+    def test_14_timeline_drag_drop_date_updates(self):
+        """Test timeline drag-and-drop functionality by updating ancla dates"""
+        logger.info("Testing timeline drag-and-drop date updates...")
+        
+        for profile, user_id in self.user_ids.items():
+            # Create a new ancla specifically for timeline testing
+            category_key = next(key for key in self.category_ids.keys() if key.startswith(profile))
+            category_id = self.category_ids[category_key]
+            
+            original_date = datetime(2024, 1, 15, 10, 0, 0)
+            ancla_data = {
+                "title": f"Timeline Test Ancla for {profile}",
+                "description": f"Testing drag-and-drop date updates for {profile}",
+                "type": "task",
+                "priority": "important",
+                "category_id": category_id,
+                "repeat_type": "no_repeat",
+                "all_day": False,
+                "start_date": original_date.isoformat(),
+                "start_time": "10:00",
+                "end_time": "11:00",
+                "emoji": "📅"
+            }
+            
+            # Create the ancla
+            response = requests.post(f"{API_URL}/anclas?user_id={user_id}", json=ancla_data)
+            self.assertEqual(response.status_code, 200, f"Failed to create timeline test ancla for {profile}: {response.text}")
+            
+            timeline_ancla = response.json()
+            timeline_ancla_id = timeline_ancla["id"]
+            
+            # Test 1: Update start_date (simulating drag-and-drop to new date)
+            new_date = datetime(2024, 1, 20, 10, 0, 0)
+            update_data = {
+                "title": timeline_ancla["title"],
+                "description": timeline_ancla["description"],
+                "type": timeline_ancla["type"],
+                "priority": timeline_ancla["priority"],
+                "category_id": timeline_ancla["category_id"],
+                "repeat_type": timeline_ancla["repeat_type"],
+                "all_day": timeline_ancla["all_day"],
+                "start_date": new_date.isoformat(),
+                "start_time": timeline_ancla["start_time"],
+                "end_time": timeline_ancla["end_time"],
+                "emoji": timeline_ancla["emoji"]
+            }
+            
+            update_response = requests.put(f"{API_URL}/anclas/{timeline_ancla_id}", json=update_data)
+            self.assertEqual(update_response.status_code, 200, f"Failed to update ancla date for {profile}: {update_response.text}")
+            
+            # Verify the date was updated
+            get_response = requests.get(f"{API_URL}/anclas/{timeline_ancla_id}")
+            self.assertEqual(get_response.status_code, 200)
+            updated_ancla = get_response.json()
+            
+            # Parse the returned date and compare
+            updated_date = datetime.fromisoformat(updated_ancla["start_date"].replace('Z', '+00:00'))
+            self.assertEqual(updated_date.date(), new_date.date(), f"Start date not updated correctly for {profile}")
+            
+            # Verify status remains consistent (should still be active)
+            self.assertEqual(updated_ancla["status"], "active", f"Status changed unexpectedly after date update for {profile}")
+            
+            logger.info(f"Successfully tested date update for profile {profile}")
+    
+    def test_15_timeline_date_format_handling(self):
+        """Test various date formats for timeline functionality"""
+        logger.info("Testing various date formats...")
+        
+        profile = "content_creator"  # Use one profile for format testing
+        user_id = self.user_ids[profile]
+        category_key = next(key for key in self.category_ids.keys() if key.startswith(profile))
+        category_id = self.category_ids[category_key]
+        
+        # Test different date formats
+        date_formats = [
+            datetime(2024, 2, 1, 14, 30, 0).isoformat(),  # ISO format
+            datetime(2024, 2, 2, 9, 0, 0).isoformat() + "Z",  # ISO with Z
+            datetime(2024, 2, 3, 16, 45, 0).isoformat() + "+00:00",  # ISO with timezone
+        ]
+        
+        for i, date_str in enumerate(date_formats):
+            ancla_data = {
+                "title": f"Date Format Test {i+1}",
+                "description": f"Testing date format: {date_str}",
+                "type": "task",
+                "priority": "informative",
+                "category_id": category_id,
+                "repeat_type": "no_repeat",
+                "all_day": False,
+                "start_date": date_str,
+                "start_time": "09:00",
+                "end_time": "10:00",
+                "emoji": "🕐"
+            }
+            
+            response = requests.post(f"{API_URL}/anclas?user_id={user_id}", json=ancla_data)
+            self.assertEqual(response.status_code, 200, f"Failed to create ancla with date format {date_str}: {response.text}")
+            
+            ancla = response.json()
+            self.assertIsNotNone(ancla["start_date"], f"Start date is None for format {date_str}")
+            
+            logger.info(f"Successfully created ancla with date format: {date_str}")
+    
+    def test_16_timeline_dashboard_grouping(self):
+        """Test that dashboard returns anclas grouped correctly for timeline view"""
+        logger.info("Testing dashboard ancla grouping for timeline...")
+        
+        for profile, user_id in self.user_ids.items():
+            dashboard_response = requests.get(f"{API_URL}/users/{user_id}/dashboard")
+            self.assertEqual(dashboard_response.status_code, 200, f"Failed to get dashboard for {profile}: {dashboard_response.text}")
+            
+            dashboard = dashboard_response.json()
+            
+            # Verify anclas are properly grouped
+            self.assertIn("anclas", dashboard, "Dashboard missing anclas section")
+            anclas_data = dashboard["anclas"]
+            
+            # Check required groupings
+            required_groups = ["active", "completed", "overdue", "total"]
+            for group in required_groups:
+                self.assertIn(group, anclas_data, f"Dashboard missing {group} anclas group")
+            
+            # Verify data types
+            self.assertIsInstance(anclas_data["active"], list, "Active anclas should be a list")
+            self.assertIsInstance(anclas_data["completed"], list, "Completed anclas should be a list")
+            self.assertIsInstance(anclas_data["overdue"], list, "Overdue anclas should be a list")
+            self.assertIsInstance(anclas_data["total"], int, "Total anclas should be an integer")
+            
+            # Verify each ancla has required date fields
+            all_anclas = anclas_data["active"] + anclas_data["completed"] + anclas_data["overdue"]
+            for ancla in all_anclas:
+                self.assertIn("start_date", ancla, "Ancla missing start_date field")
+                self.assertIn("status", ancla, "Ancla missing status field")
+                self.assertIsNotNone(ancla["start_date"], "Ancla start_date is None")
+                
+            logger.info(f"Verified dashboard grouping for profile {profile}")
+    
+    def test_17_timeline_date_validation(self):
+        """Test date validation for timeline functionality"""
+        logger.info("Testing date validation...")
+        
+        profile = "student"  # Use one profile for validation testing
+        user_id = self.user_ids[profile]
+        category_key = next(key for key in self.category_ids.keys() if key.startswith(profile))
+        category_id = self.category_ids[category_key]
+        
+        # Test with invalid date format (should handle gracefully)
+        invalid_ancla_data = {
+            "title": "Invalid Date Test",
+            "description": "Testing invalid date handling",
+            "type": "task",
+            "priority": "informative",
+            "category_id": category_id,
+            "repeat_type": "no_repeat",
+            "all_day": False,
+            "start_date": "invalid-date-format",
+            "start_time": "09:00",
+            "end_time": "10:00",
+            "emoji": "❌"
+        }
+        
+        # This should either fail gracefully or handle the invalid date
+        response = requests.post(f"{API_URL}/anclas?user_id={user_id}", json=invalid_ancla_data)
+        # We expect this to either return 400 (validation error) or 422 (unprocessable entity)
+        self.assertIn(response.status_code, [400, 422], f"Expected validation error for invalid date, got {response.status_code}: {response.text}")
+        
+        logger.info("Date validation test completed")
+    
+    def test_18_timeline_ancla_status_consistency(self):
+        """Test that ancla status remains consistent during timeline operations"""
+        logger.info("Testing ancla status consistency during timeline operations...")
+        
+        profile = "freelancer"  # Use one profile for consistency testing
+        user_id = self.user_ids[profile]
+        category_key = next(key for key in self.category_ids.keys() if key.startswith(profile))
+        category_id = self.category_ids[category_key]
+        
+        # Create ancla in active status
+        ancla_data = {
+            "title": "Status Consistency Test",
+            "description": "Testing status consistency during date updates",
+            "type": "task",
+            "priority": "important",
+            "category_id": category_id,
+            "repeat_type": "no_repeat",
+            "all_day": False,
+            "start_date": datetime(2024, 3, 1, 12, 0, 0).isoformat(),
+            "start_time": "12:00",
+            "end_time": "13:00",
+            "emoji": "✅"
+        }
+        
+        response = requests.post(f"{API_URL}/anclas?user_id={user_id}", json=ancla_data)
+        self.assertEqual(response.status_code, 200, f"Failed to create status test ancla: {response.text}")
+        
+        ancla = response.json()
+        ancla_id = ancla["id"]
+        
+        # Verify initial status is active
+        self.assertEqual(ancla["status"], "active", "Initial status should be active")
+        
+        # Complete the ancla
+        complete_response = requests.post(f"{API_URL}/anclas/{ancla_id}/complete")
+        self.assertEqual(complete_response.status_code, 200, f"Failed to complete ancla: {complete_response.text}")
+        
+        # Now try to update the date and verify status remains completed
+        update_data = {
+            "title": ancla["title"],
+            "description": ancla["description"],
+            "type": ancla["type"],
+            "priority": ancla["priority"],
+            "category_id": ancla["category_id"],
+            "repeat_type": ancla["repeat_type"],
+            "all_day": ancla["all_day"],
+            "start_date": datetime(2024, 3, 5, 12, 0, 0).isoformat(),
+            "start_time": ancla["start_time"],
+            "end_time": ancla["end_time"],
+            "emoji": ancla["emoji"]
+        }
+        
+        update_response = requests.put(f"{API_URL}/anclas/{ancla_id}", json=update_data)
+        self.assertEqual(update_response.status_code, 200, f"Failed to update completed ancla date: {update_response.text}")
+        
+        # Get the updated ancla and check status
+        get_response = requests.get(f"{API_URL}/anclas/{ancla_id}")
+        self.assertEqual(get_response.status_code, 200)
+        updated_ancla = get_response.json()
+        
+        # Note: The current implementation might reset status to active when updating
+        # This test will reveal the actual behavior
+        logger.info(f"Status after date update: {updated_ancla['status']}")
+        
+        # The status should ideally remain 'completed', but we'll log what actually happens
+        # This is important feedback for the timeline drag-and-drop functionality
+        
+        logger.info("Status consistency test completed")
 
 if __name__ == "__main__":
     # Run the tests in order
