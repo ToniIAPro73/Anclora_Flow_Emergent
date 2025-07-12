@@ -493,3 +493,130 @@
 .bg-danger { background-color: var(--color-danger); }
 .bg-neutral-100 { background-color: var(--color-neutral-100); }
 .bg-neutral-200 { background-color: var(--color-neutral-200); }
+
+/* Responsive Design según guía Anclora */
+/* Breakpoints: sm: 640px, md: 768px, lg: 1024px, xl: 1280px */
+
+/* Container oficial Anclora */
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 var(--space-2);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-2);
+}
+
+.col-1 { grid-column: span 1; }
+.col-2 { grid-column: span 2; }
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-5 { grid-column: span 5; }
+.col-6 { grid-column: span 6; }
+.col-7 { grid-column: span 7; }
+.col-8 { grid-column: span 8; }
+.col-9 { grid-column: span 9; }
+.col-10 { grid-column: span 10; }
+.col-11 { grid-column: span 11; }
+.col-12 { grid-column: span 12; }
+
+/* Transiciones oficiales */
+.transition-fast {
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.transition-medium {
+  transition: all var(--transition-medium);
+}
+
+/* Spinner/Loading oficial */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-neutral-300);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Estados disabled oficiales */
+.btn:disabled, .input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dark mode support según guía */
+[data-theme="dark"] {
+  --color-neutral-100: #121212;
+  --color-neutral-200: #1E1E1E;
+  --color-neutral-300: #2D2D2D;
+  --color-neutral-900: #E0E0E0;
+}
+
+/* Responsive Breakpoints */
+@media (min-width: 640px) {
+  .container {
+    padding: 0 var(--space-3);
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  h1 { font-size: 36px; }
+  h2 { font-size: 32px; }
+  h3 { font-size: 28px; }
+  
+  .text-body {
+    font-size: 18px;
+  }
+  
+  .dashboard {
+    padding: var(--space-4);
+  }
+  
+  .dashboard-header {
+    padding: var(--space-6);
+  }
+  
+  .form-card {
+    max-width: 500px;
+    padding: var(--space-6);
+  }
+  
+  .row {
+    grid-template-columns: repeat(8, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+  
+  .container {
+    padding: 0 var(--space-4);
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .container {
+    max-width: 1280px;
+  }
+}
