@@ -510,6 +510,13 @@ export const Dashboard = ({
           </div>
           <div className="flex items-center gap-4">
             <button
+              onClick={() => onViewChange('ai-assistant')}
+              className="btn-primary"
+              title="Asistente Financiero IA"
+            >
+              🤖 IA Financiera
+            </button>
+            <button
               onClick={() => onViewChange('notification-settings')}
               className="btn-secondary"
               title="Configurar Notificaciones"
