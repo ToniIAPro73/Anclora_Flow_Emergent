@@ -248,3 +248,248 @@
 .icon-danger {
   color: var(--color-danger);
 }
+
+/* Dashboard y Layout oficiales */
+.App {
+  min-height: 100vh;
+  background: var(--ocean-gradient);
+}
+
+.dashboard {
+  min-height: 100vh;
+  background: var(--wave-gradient);
+  padding: var(--space-3);
+}
+
+.dashboard-header {
+  background: var(--color-neutral-100);
+  border-radius: 12px;
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--color-neutral-300);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-3);
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+/* Componentes específicos del dashboard */
+.rank-badge {
+  background: var(--color-primary);
+  color: var(--color-neutral-100);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.streak-counter {
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-900);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: 1px solid var(--color-neutral-300);
+}
+
+/* Elementos de lista y navegación */
+.ancla-item, .habit-item, .objective-item, .transaction-item, .diary-entry {
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: var(--space-2);
+  margin-bottom: var(--space-2);
+  transition: var(--transition-fast);
+}
+
+.ancla-item:hover, .habit-item:hover, .objective-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ancla-item {
+  border-left: 4px solid var(--color-primary);
+}
+
+.ancla-item.completed {
+  border-left-color: var(--color-success);
+  opacity: 0.8;
+}
+
+.ancla-item.overdue {
+  border-left-color: var(--color-danger);
+}
+
+/* Estados y prioridades */
+.ancla-priority {
+  display: inline-block;
+  padding: calc(var(--space-1) / 2) var(--space-1);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: var(--space-1);
+}
+
+.ancla-priority.urgent {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--color-danger);
+}
+
+.ancla-priority.important {
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--color-warning);
+}
+
+.ancla-priority.informative {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--color-success);
+}
+
+/* Barras de progreso */
+.habit-progress, .objective-progress {
+  width: 100%;
+  height: 8px;
+  background: var(--color-neutral-300);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: var(--space-1);
+}
+
+.habit-progress-bar, .objective-progress-bar {
+  height: 100%;
+  background: var(--wave-gradient);
+  transition: width var(--transition-medium);
+}
+
+/* Transacciones */
+.transaction-amount {
+  font-weight: 600;
+}
+
+.transaction-amount.income {
+  color: var(--color-success);
+}
+
+.transaction-amount.expense {
+  color: var(--color-danger);
+}
+
+/* Perfil de usuario */
+.profile-selection {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  background: var(--wave-gradient);
+}
+
+.profile-card {
+  background: var(--color-neutral-100);
+  border: 2px solid var(--color-neutral-300);
+  border-radius: 12px;
+  padding: var(--space-4);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+  min-width: 250px;
+}
+
+.profile-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  border-color: var(--color-primary);
+}
+
+.profile-card.selected {
+  background: var(--color-primary);
+  color: var(--color-neutral-100);
+  border-color: var(--color-primary-dark);
+}
+
+/* Estados de focus para accesibilidad */
+:focus {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* Utilidades de espaciado Anclora */
+.p-1 { padding: var(--space-1); }
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+
+.m-1 { margin: var(--space-1); }
+.m-2 { margin: var(--space-2); }
+.m-3 { margin: var(--space-3); }
+.m-4 { margin: var(--space-4); }
+
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+
+/* Clases de tipografía Anclora */
+.text-h1 {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text-h2 {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text-h3 {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.text-body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-caption {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Estados de color para texto */
+.text-primary { color: var(--color-primary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-danger { color: var(--color-danger); }
+.text-neutral { color: var(--color-neutral-900); }
+
+/* Fondos de estado */
+.bg-primary { background-color: var(--color-primary); }
+.bg-secondary { background-color: var(--color-secondary); }
+.bg-success { background-color: var(--color-success); }
+.bg-warning { background-color: var(--color-warning); }
+.bg-danger { background-color: var(--color-danger); }
+.bg-neutral-100 { background-color: var(--color-neutral-100); }
+.bg-neutral-200 { background-color: var(--color-neutral-200); }
