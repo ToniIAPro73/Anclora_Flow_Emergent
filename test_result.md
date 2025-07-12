@@ -328,7 +328,13 @@ test_plan:
     - "Dashboard principal con componentes marítimos"
     - "Timeline interactivo (Marea de Tiempo) con drag-and-drop"
     - "Presupuesto Incrementado - Análisis Visual, Límites, Metas, Reportes, Comparativas y Predicciones"
-  stuck_tasks: []
+    - "AI Financial Recommendations Engine"
+    - "AI Chat System for Financial Questions"
+    - "AI Recommendation Actions Management"
+  stuck_tasks: 
+    - "AI Financial Recommendations Engine"
+    - "AI Chat System for Financial Questions"
+    - "AI Recommendation Actions Management"
   test_all: false
   test_priority: "high_first"
 
