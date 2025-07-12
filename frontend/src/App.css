@@ -24,14 +24,37 @@ body {
 
 /* Maritime theme colors */
 :root {
-  --primary-blue: #4299e1;
-  --secondary-blue: #63b3ed;
-  --accent-teal: #38b2ac;
-  --light-blue: #bee3f8;
-  --navy: #2c5282;
-  --coral: #fd9797;
-  --sand: #f7fafc;
-  --wave-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Paleta de Colores Oficial Anclora */
+  --color-primary: #006EE6;
+  --color-primary-dark: #0056B8;
+  --color-secondary: #00B8D9;
+  --color-success: #28A745;
+  --color-warning: #FFC107;
+  --color-danger: #DC3545;
+  --color-neutral-100: #FFFFFF;
+  --color-neutral-200: #F5F5F5;
+  --color-neutral-300: #E0E0E0;
+  --color-neutral-900: #0D0D0D;
+
+  /* Tipografía Oficial */
+  --font-heading: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Espaciado Sistema 8px */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+
+  /* Transiciones */
+  --transition-fast: 150ms ease-in-out;
+  --transition-medium: 300ms ease;
+
+  /* Gradientes marítimos actualizados */
+  --wave-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  --ocean-gradient: linear-gradient(180deg, var(--color-neutral-100) 0%, var(--color-neutral-200) 100%);
 }
 
 /* Card styles with maritime theme */
