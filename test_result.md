@@ -213,6 +213,42 @@ backend:
         agent: "testing"
         comment: "Financial reports endpoints funcionando correctamente. GET /api/financial-reports/{user_id} con diferentes tipos de reporte (weekly, monthly, yearly). Generación correcta de reportes con cálculos precisos, desglose por categorías, tendencias y persistencia de datos. Serialización de fechas funcionando correctamente."
 
+  - task: "AI Financial Recommendations Engine"
+    implemented: false
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL: AI Financial Recommendations system is NOT IMPLEMENTED. While FinancialAIEngine class and AI models (AIRecommendation, AIInsights) are defined in server.py, the actual API endpoints are missing. Required endpoints not found: GET /api/ai-recommendations/{user_id}, GET /api/ai-chat/{user_id}, POST /api/ai-recommendations/{recommendation_id}/action. The AI system requested for testing does not exist in the backend implementation."
+
+  - task: "AI Chat System for Financial Questions"
+    implemented: false
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL: AI Chat system endpoint GET /api/ai-chat/{user_id} is not implemented. While the FinancialAIEngine class exists with methods for generating recommendations, there are no API routes that expose this functionality for maritime-themed financial chat responses."
+
+  - task: "AI Recommendation Actions Management"
+    implemented: false
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL: AI Recommendation actions endpoint POST /api/ai-recommendations/{recommendation_id}/action is not implemented. No functionality exists to update recommendation status (completed, dismissed, etc.) or handle recommendation interactions."
+
 frontend:
   - task: "Estructura base con autenticación y selección de perfil"
     implemented: true
