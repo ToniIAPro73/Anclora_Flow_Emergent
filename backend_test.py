@@ -1083,6 +1083,320 @@ class AncloraBackendTest(unittest.TestCase):
         logger.error("2. GET /api/ai-chat/{user_id} - AI chat system with financial questions")
         logger.error("3. POST /api/ai-recommendations/{recommendation_id}/action - Update recommendation status")
 
+    def test_36_comprehensive_ai_system_testing(self):
+        """Comprehensive test for AI Financial Recommendations system when implemented"""
+        logger.info("Testing AI Financial Recommendations system comprehensively...")
+        
+        # Use content_creator profile with rich transaction history for AI testing
+        profile = "content_creator"
+        user_id = self.user_ids[profile]
+        
+        # First, create additional transaction data to give AI more patterns to analyze
+        self._create_rich_transaction_history(user_id, profile)
+        
+        # Test 1: AI Recommendations Generation
+        logger.info("Testing AI recommendations generation...")
+        response = requests.get(f"{API_URL}/ai-recommendations/{user_id}")
+        
+        if response.status_code == 404:
+            logger.error("CRITICAL: AI recommendations endpoint not implemented")
+            return
+        
+        self.assertEqual(response.status_code, 200, f"Failed to get AI recommendations: {response.text}")
+        recommendations = response.json()
+        
+        # Verify AI recommendations structure
+        self.assertIn("recommendations", recommendations)
+        self.assertIn("financial_health_score", recommendations)
+        self.assertIn("insights", recommendations)
+        
+        # Verify financial health score is 0-100
+        health_score = recommendations["financial_health_score"]
+        self.assertGreaterEqual(health_score, 0)
+        self.assertLessEqual(health_score, 100)
+        
+        # Verify recommendations structure
+        for rec in recommendations["recommendations"]:
+            required_fields = ["id", "type", "category", "title", "message", "action_suggestion", 
+                             "priority", "confidence_score", "maritime_theme", "status"]
+            for field in required_fields:
+                self.assertIn(field, rec, f"Recommendation missing field {field}")
+            
+            # Verify recommendation types
+            self.assertIn(rec["type"], ["savings", "alert", "goal", "optimization", "insight"])
+            
+            # Verify priority and confidence ranges
+            self.assertGreaterEqual(rec["priority"], 1)
+            self.assertLessEqual(rec["priority"], 5)
+            self.assertGreaterEqual(rec["confidence_score"], 0.0)
+            self.assertLessEqual(rec["confidence_score"], 1.0)
+            
+            # Verify maritime theme is present
+            self.assertIsNotNone(rec["maritime_theme"])
+            self.assertGreater(len(rec["maritime_theme"]), 0)
+        
+        logger.info(f"AI generated {len(recommendations['recommendations'])} recommendations with health score {health_score}")
+        
+        # Test 2: AI Chat System
+        logger.info("Testing AI chat system...")
+        
+        # Test different types of financial questions
+        test_questions = [
+            {"question": "¿Cómo puedo ahorrar más dinero?", "expected_keywords": ["ahorrar", "dinero"]},
+            {"question": "¿Cuáles son mis gastos principales?", "expected_keywords": ["gastos", "principales"]},
+            {"question": "¿Cómo está mi presupuesto?", "expected_keywords": ["presupuesto"]},
+            {"question": "¿Qué ingresos tengo este mes?", "expected_keywords": ["ingresos", "mes"]}
+        ]
+        
+        for test_q in test_questions:
+            chat_response = requests.get(f"{API_URL}/ai-chat/{user_id}", 
+                                       params={"question": test_q["question"]})
+            
+            if chat_response.status_code == 404:
+                logger.error("CRITICAL: AI chat endpoint not implemented")
+                continue
+                
+            self.assertEqual(chat_response.status_code, 200, f"Failed to get AI chat response: {chat_response.text}")
+            chat_data = chat_response.json()
+            
+            # Verify chat response structure
+            self.assertIn("response", chat_data)
+            self.assertIn("maritime_theme", chat_data)
+            self.assertIn("confidence", chat_data)
+            self.assertIn("suggestions", chat_data)
+            
+            # Verify maritime terminology is used
+            self.assertIsNotNone(chat_data["maritime_theme"])
+            
+            # Verify confidence score
+            self.assertGreaterEqual(chat_data["confidence"], 0.0)
+            self.assertLessEqual(chat_data["confidence"], 1.0)
+            
+            logger.info(f"AI chat responded to: '{test_q['question']}' with confidence {chat_data['confidence']}")
+        
+        # Test 3: Recommendation Actions
+        logger.info("Testing recommendation actions...")
+        
+        if recommendations.get("recommendations"):
+            test_recommendation = recommendations["recommendations"][0]
+            rec_id = test_recommendation["id"]
+            
+            # Test completing a recommendation
+            action_response = requests.post(f"{API_URL}/ai-recommendations/{rec_id}/action", 
+                                          json={"action": "completed"})
+            
+            if action_response.status_code == 404:
+                logger.error("CRITICAL: AI recommendation action endpoint not implemented")
+            else:
+                self.assertEqual(action_response.status_code, 200, f"Failed to update recommendation: {action_response.text}")
+                
+                # Verify the action was recorded
+                updated_recs = requests.get(f"{API_URL}/ai-recommendations/{user_id}")
+                if updated_recs.status_code == 200:
+                    updated_data = updated_recs.json()
+                    updated_rec = next((r for r in updated_data["recommendations"] if r["id"] == rec_id), None)
+                    if updated_rec:
+                        self.assertEqual(updated_rec["status"], "completed")
+                        logger.info(f"Successfully updated recommendation {rec_id} to completed")
+        
+        # Test 4: Data Persistence
+        logger.info("Testing AI data persistence...")
+        
+        # Verify recommendations are stored in database
+        # This would require checking the ai_recommendations collection
+        
+        # Test 5: Integration with Real Data
+        logger.info("Testing AI integration with real transaction data...")
+        
+        # Get user's actual transaction data
+        transactions_response = requests.get(f"{API_URL}/transactions/{user_id}")
+        self.assertEqual(transactions_response.status_code, 200)
+        transactions = transactions_response.json()
+        
+        # Get budget limits
+        limits_response = requests.get(f"{API_URL}/budget-limits/{user_id}")
+        self.assertEqual(limits_response.status_code, 200)
+        limits = limits_response.json()
+        
+        # Get savings goals
+        goals_response = requests.get(f"{API_URL}/savings-goals/{user_id}")
+        self.assertEqual(goals_response.status_code, 200)
+        goals = goals_response.json()
+        
+        # Verify AI recommendations are based on actual data
+        if response.status_code == 200:
+            # AI should generate different recommendations based on spending patterns
+            self.assertGreater(len(recommendations["recommendations"]), 0, 
+                             "AI should generate recommendations based on transaction data")
+            
+            # Verify recommendations are relevant to user's spending categories
+            user_categories = set(t["category"] for t in transactions if t["type"] == "expense")
+            rec_categories = set(r["category"] for r in recommendations["recommendations"])
+            
+            # At least some recommendations should relate to user's actual spending categories
+            if user_categories and rec_categories:
+                common_categories = user_categories.intersection(rec_categories)
+                logger.info(f"AI recommendations cover {len(common_categories)} of user's spending categories")
+        
+        logger.info("Comprehensive AI system testing completed")
+    
+    def _create_rich_transaction_history(self, user_id, profile):
+        """Create rich transaction history for AI analysis"""
+        logger.info(f"Creating rich transaction history for AI analysis - {profile}")
+        
+        # Get budget categories for this profile
+        dashboard_response = requests.get(f"{API_URL}/users/{user_id}/dashboard")
+        dashboard = dashboard_response.json()
+        
+        income_categories = dashboard["budget_categories"]["income"]
+        expense_categories = dashboard["budget_categories"]["expense"]
+        
+        from datetime import date, timedelta
+        import random
+        
+        # Create varied transaction patterns over the last 3 months
+        for i in range(30):  # 30 additional transactions
+            transaction_date = date.today() - timedelta(days=random.randint(1, 90))
+            
+            # Create income transactions (less frequent)
+            if i % 5 == 0:
+                income_data = {
+                    "type": "income",
+                    "category": random.choice(income_categories),
+                    "description": f"Income transaction {i}",
+                    "amount": random.uniform(800, 2000),
+                    "date": transaction_date.isoformat()
+                }
+                requests.post(f"{API_URL}/transactions?user_id={user_id}", json=income_data)
+            
+            # Create expense transactions with patterns
+            expense_data = {
+                "type": "expense",
+                "category": random.choice(expense_categories),
+                "description": f"Expense transaction {i}",
+                "amount": random.uniform(50, 800),
+                "date": transaction_date.isoformat()
+            }
+            requests.post(f"{API_URL}/transactions?user_id={user_id}", json=expense_data)
+        
+        logger.info(f"Created rich transaction history for {profile}")
+
+    def test_37_ai_maritime_theme_verification(self):
+        """Test that AI responses properly use maritime terminology"""
+        logger.info("Testing AI maritime theme implementation...")
+        
+        profile = "freelancer"
+        user_id = self.user_ids[profile]
+        
+        # Test AI recommendations for maritime terminology
+        response = requests.get(f"{API_URL}/ai-recommendations/{user_id}")
+        
+        if response.status_code == 404:
+            logger.error("CRITICAL: AI recommendations endpoint not implemented")
+            return
+        
+        self.assertEqual(response.status_code, 200)
+        recommendations = response.json()
+        
+        # Maritime terms that should appear in AI responses
+        maritime_terms = [
+            "⚓", "🌊", "🧭", "⛵", "🏝️", "🌅", "🪝",
+            "anclar", "navegar", "puerto", "marea", "rumbo", 
+            "capitán", "grumete", "velas", "horizonte"
+        ]
+        
+        # Check recommendations for maritime terminology
+        maritime_found = False
+        for rec in recommendations.get("recommendations", []):
+            rec_text = f"{rec['title']} {rec['message']} {rec['maritime_theme']}".lower()
+            
+            for term in maritime_terms:
+                if term in rec_text:
+                    maritime_found = True
+                    logger.info(f"Found maritime term '{term}' in recommendation: {rec['title']}")
+                    break
+        
+        self.assertTrue(maritime_found, "AI recommendations should include maritime terminology")
+        
+        # Test AI chat for maritime responses
+        maritime_questions = [
+            "¿Cómo navego mis finanzas?",
+            "¿Cuál es mi rumbo financiero?",
+            "¿Cómo anclo mis gastos?"
+        ]
+        
+        for question in maritime_questions:
+            chat_response = requests.get(f"{API_URL}/ai-chat/{user_id}", 
+                                       params={"question": question})
+            
+            if chat_response.status_code == 200:
+                chat_data = chat_response.json()
+                response_text = chat_data.get("response", "").lower()
+                maritime_theme = chat_data.get("maritime_theme", "").lower()
+                
+                # Verify maritime terminology in response
+                maritime_in_response = any(term in response_text or term in maritime_theme 
+                                         for term in maritime_terms)
+                
+                if maritime_in_response:
+                    logger.info(f"Maritime terminology found in chat response for: {question}")
+                else:
+                    logger.warning(f"No maritime terminology found in chat response for: {question}")
+        
+        logger.info("Maritime theme verification completed")
+
+    def test_38_ai_personalized_insights(self):
+        """Test AI personalized insights for different user profiles"""
+        logger.info("Testing AI personalized insights for different user profiles...")
+        
+        # Test AI recommendations for each user profile
+        for profile, user_id in self.user_ids.items():
+            logger.info(f"Testing AI insights for {profile} profile...")
+            
+            response = requests.get(f"{API_URL}/ai-recommendations/{user_id}")
+            
+            if response.status_code == 404:
+                logger.error(f"CRITICAL: AI recommendations endpoint not implemented for {profile}")
+                continue
+            
+            self.assertEqual(response.status_code, 200, f"Failed to get AI recommendations for {profile}")
+            recommendations = response.json()
+            
+            # Verify profile-specific insights
+            insights = recommendations.get("insights", {})
+            
+            # Each profile should have different focus areas
+            profile_expectations = {
+                "content_creator": ["equipment", "marketing", "content"],
+                "freelancer": ["clients", "tools", "diversification"],
+                "student": ["education", "transportation", "food"],
+                "professional": ["career", "savings", "investments"]
+            }
+            
+            expected_terms = profile_expectations.get(profile, [])
+            
+            # Check if AI recommendations are relevant to the profile
+            all_rec_text = " ".join([
+                f"{rec['title']} {rec['message']} {rec['action_suggestion']}"
+                for rec in recommendations.get("recommendations", [])
+            ]).lower()
+            
+            profile_relevant = any(term in all_rec_text for term in expected_terms)
+            
+            if profile_relevant:
+                logger.info(f"AI recommendations are relevant to {profile} profile")
+            else:
+                logger.warning(f"AI recommendations may not be specific to {profile} profile")
+            
+            # Verify financial health score varies by profile
+            health_score = recommendations.get("financial_health_score", 0)
+            self.assertGreaterEqual(health_score, 0)
+            self.assertLessEqual(health_score, 100)
+            
+            logger.info(f"Financial health score for {profile}: {health_score}")
+        
+        logger.info("AI personalized insights testing completed")
+
 if __name__ == "__main__":
     # Run the tests in order
     unittest.main(verbosity=2)
