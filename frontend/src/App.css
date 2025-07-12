@@ -82,8 +82,23 @@ small {
 
 .App {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background: var(--ocean-gradient);
+}
+
+/* Main content container */
+.main-content {
+  min-height: 100vh;
+}
+
+.main-content.mobile {
+  padding-bottom: 80px;
+}
+
+/* Aplicar el container oficial directamente al main-content */
+.main-content .container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 var(--space-2);
 }
 
 /* Maritime theme colors */
