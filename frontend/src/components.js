@@ -2175,7 +2175,359 @@ export const Timeline = ({
   );
 };
 
-// Advanced Budget Component - Presupuesto Incrementado
+// AI Financial Assistant Component
+export const AIFinancialAssistant = ({ user, onViewChange }) => {
+  const [aiInsights, setAiInsights] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('insights');
+
+  useEffect(() => {
+    loadAIInsights();
+  }, [user?.id]);
+
+  const loadAIInsights = async () => {
+    try {
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${BACKEND_URL}/api/ai-recommendations/${user.id}`);
+      const insights = await response.json();
+      setAiInsights(insights);
+    } catch (error) {
+      console.error('Error loading AI insights:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRecommendationAction = async (recommendationId, action) => {
+    try {
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      await fetch(`${BACKEND_URL}/api/ai-recommendations/${recommendationId}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
+      await loadAIInsights(); // Refresh
+    } catch (error) {
+      console.error('Error handling recommendation action:', error);
+    }
+  };
+
+  const sendChatMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    setChatLoading(true);
+    const userMessage = { type: 'user', message: newMessage, timestamp: new Date() };
+    setChatMessages(prev => [...prev, userMessage]);
+
+    try {
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(
+        `${BACKEND_URL}/api/ai-chat/${user.id}?question=${encodeURIComponent(newMessage)}`
+      );
+      const data = await response.json();
+      
+      const aiMessage = { 
+        type: 'ai', 
+        message: data.response, 
+        suggestions: data.suggestions,
+        timestamp: new Date() 
+      };
+      setChatMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      const errorMessage = { 
+        type: 'ai', 
+        message: '🌊 Disculpa, capitán. Hay problemas en las comunicaciones. Intenta de nuevo.',
+        timestamp: new Date() 
+      };
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setNewMessage('');
+      setChatLoading(false);
+    }
+  };
+
+  const getHealthScoreColor = (score) => {
+    if (score >= 80) return '#10b981'; // Green
+    if (score >= 60) return '#f59e0b'; // Yellow
+    return '#ef4444'; // Red
+  };
+
+  const getHealthScoreLabel = (score) => {
+    if (score >= 80) return '🌊 Navegación Excelente';
+    if (score >= 60) return '⛵ Rumbo Estable';
+    return '⚠️ Aguas Turbulentas';
+  };
+
+  const getPriorityIcon = (priority) => {
+    if (priority >= 5) return '🚨';
+    if (priority >= 4) return '⚠️';
+    if (priority >= 3) return '📢';
+    return 'ℹ️';
+  };
+
+  if (loading) {
+    return (
+      <div className="ai-assistant">
+        <div className="ai-loading">
+          <div className="loading-spinner"></div>
+          <p>🤖 Analizando tus patrones financieros...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ai-assistant">
+      <div className="ai-header">
+        <button
+          onClick={() => onViewChange('dashboard')}
+          className="btn-secondary"
+        >
+          ← Volver al Dashboard
+        </button>
+        <h1 className="ai-title">🤖 Asistente Financiero IA</h1>
+        <div className="ai-health-score">
+          <div 
+            className="health-score-circle"
+            style={{ '--score-color': getHealthScoreColor(aiInsights?.spending_health_score || 0) }}
+          >
+            <span className="score-number">{Math.round(aiInsights?.spending_health_score || 0)}</span>
+            <span className="score-label">Salud Financiera</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="ai-tab-navigation">
+        <button
+          className={`ai-tab ${activeTab === 'insights' ? 'active' : ''}`}
+          onClick={() => setActiveTab('insights')}
+        >
+          🧠 Insights
+        </button>
+        <button
+          className={`ai-tab ${activeTab === 'recommendations' ? 'active' : ''}`}
+          onClick={() => setActiveTab('recommendations')}
+        >
+          💡 Recomendaciones
+        </button>
+        <button
+          className={`ai-tab ${activeTab === 'chat' ? 'active' : ''}`}
+          onClick={() => setActiveTab('chat')}
+        >
+          💬 Chat
+        </button>
+      </div>
+
+      <div className="ai-content">
+        {activeTab === 'insights' && (
+          <div className="ai-insights">
+            <div className="insights-summary">
+              <h3>{getHealthScoreLabel(aiInsights?.spending_health_score || 0)}</h3>
+              <div className="summary-stats">
+                <div className="stat-item">
+                  <span className="stat-number">{aiInsights?.total_recommendations || 0}</span>
+                  <span className="stat-label">Recomendaciones</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">${aiInsights?.potential_monthly_savings?.toFixed(0) || 0}</span>
+                  <span className="stat-label">Ahorro Potencial/Mes</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-number">{aiInsights?.high_priority_count || 0}</span>
+                  <span className="stat-label">Prioridad Alta</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="spending-patterns">
+              <h4>🔍 Análisis de Patrones</h4>
+              <div className="patterns-grid">
+                {Object.entries(aiInsights?.spending_patterns?.category_averages || {}).map(([category, avg]) => (
+                  <div key={category} className="pattern-card">
+                    <div className="pattern-category">{category}</div>
+                    <div className="pattern-amount">${avg.toFixed(0)}/mes promedio</div>
+                    <div className="pattern-volatility">
+                      Volatilidad: ${aiInsights?.spending_patterns?.spending_volatility?.[category]?.toFixed(0) || 0}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="profile-insights">
+              <h4>⚓ Consejos para {user?.profile?.replace('_', ' ')}</h4>
+              <div className="profile-advice">
+                <p>{aiInsights?.financial_goals_analysis?.advice}</p>
+                <p className="maritime-analogy">
+                  <em>{aiInsights?.financial_goals_analysis?.maritime_analogy}</em>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'recommendations' && (
+          <div className="ai-recommendations">
+            <div className="recommendations-header">
+              <h3>💡 Recomendaciones Personalizadas</h3>
+              <p>Basadas en análisis de tus últimos 90 días</p>
+            </div>
+
+            <div className="recommendations-list">
+              {aiInsights?.top_recommendations?.map((rec, index) => (
+                <div key={index} className={`recommendation-card ${rec.type}`}>
+                  <div className="rec-header">
+                    <span className="rec-priority">{getPriorityIcon(rec.priority)}</span>
+                    <h4 className="rec-title">{rec.title}</h4>
+                    <span className="rec-confidence">{Math.round(rec.confidence_score * 100)}%</span>
+                  </div>
+                  
+                  <p className="rec-message">{rec.message}</p>
+                  
+                  <div className="rec-details">
+                    <div className="rec-category">📂 {rec.category}</div>
+                    {rec.potential_savings > 0 && (
+                      <div className="rec-savings">💰 ${rec.potential_savings.toFixed(0)} ahorro potencial</div>
+                    )}
+                  </div>
+                  
+                  <div className="rec-actions">
+                    <button
+                      onClick={() => handleRecommendationAction(rec.id, 'completed')}
+                      className="btn-primary btn-small"
+                    >
+                      ✓ Aplicar
+                    </button>
+                    <button
+                      onClick={() => handleRecommendationAction(rec.id, 'dismissed')}
+                      className="btn-secondary btn-small"
+                    >
+                      ✕ Descartar
+                    </button>
+                  </div>
+                  
+                  <div className="rec-suggestion">
+                    <strong>💡 Acción sugerida:</strong> {rec.action_suggestion}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'chat' && (
+          <div className="ai-chat">
+            <div className="chat-header">
+              <h3>💬 Chat con tu Asistente Financiero</h3>
+              <p>Pregunta sobre tus finanzas, presupuesto, ahorros y más</p>
+            </div>
+
+            <div className="chat-messages">
+              {chatMessages.length === 0 && (
+                <div className="chat-welcome">
+                  <div className="welcome-message">
+                    🧭 ¡Hola, capitán! Soy tu asistente financiero de Anclora. 
+                    Estoy aquí para ayudarte a navegar hacia una mejor salud financiera.
+                  </div>
+                  <div className="chat-suggestions">
+                    <h4>Pregúntame sobre:</h4>
+                    <div className="suggestion-buttons">
+                      <button 
+                        className="suggestion-btn"
+                        onClick={() => setNewMessage('¿Cómo puedo ahorrar más dinero?')}
+                      >
+                        💰 Ahorrar dinero
+                      </button>
+                      <button 
+                        className="suggestion-btn"
+                        onClick={() => setNewMessage('Analiza mis gastos del último mes')}
+                      >
+                        📊 Analizar gastos
+                      </button>
+                      <button 
+                        className="suggestion-btn"
+                        onClick={() => setNewMessage('¿Qué presupuesto me recomiendas?')}
+                      >
+                        🎯 Presupuesto
+                      </button>
+                      <button 
+                        className="suggestion-btn"
+                        onClick={() => setNewMessage('Ayúdame a establecer metas')}
+                      >
+                        🏝️ Metas de ahorro
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {chatMessages.map((msg, index) => (
+                <div key={index} className={`chat-message ${msg.type}`}>
+                  <div className="message-content">
+                    {msg.type === 'ai' && <span className="message-icon">🤖</span>}
+                    <div className="message-text">{msg.message}</div>
+                  </div>
+                  <div className="message-time">
+                    {msg.timestamp.toLocaleTimeString()}
+                  </div>
+                  {msg.suggestions && (
+                    <div className="message-suggestions">
+                      {msg.suggestions.map((suggestion, idx) => (
+                        <button
+                          key={idx}
+                          className="suggestion-btn small"
+                          onClick={() => setNewMessage(suggestion)}
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {chatLoading && (
+                <div className="chat-message ai">
+                  <div className="message-content">
+                    <span className="message-icon">🤖</span>
+                    <div className="typing-indicator">
+                      <span>.</span><span>.</span><span>.</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="chat-input">
+              <div className="input-container">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                  placeholder="Pregúntame sobre tus finanzas..."
+                  className="chat-input-field"
+                  disabled={chatLoading}
+                />
+                <button
+                  onClick={sendChatMessage}
+                  disabled={chatLoading || !newMessage.trim()}
+                  className="chat-send-btn"
+                >
+                  📤
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 export const AdvancedBudget = ({ 
   user, 
   data, 
