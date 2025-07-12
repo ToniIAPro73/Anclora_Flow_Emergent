@@ -465,9 +465,11 @@ function App() {
         />
       )}
 
-      {/* Main Content */}
+      {/* Main Content con container oficial Anclora */}
       <div className={`main-content ${isMobile ? 'mobile' : ''}`}>
-        {renderCurrentView()}
+        <div className="container">
+          {renderCurrentView()}
+        </div>
       </div>
 
       {/* Mobile Navigation */}
@@ -479,11 +481,15 @@ function App() {
         />
       )}
       
-      {/* Notification Permission Banner */}
+      {/* Notification Permission Banner con estilos oficiales */}
       {isSupported && permission === 'default' && (
-        <div className="notification-permission-banner">
+        <div className="notification-permission-banner bg-primary text-neutral-100">
           <span>🔔 Habilita las notificaciones para recibir recordatorios de tus anclas y alertas de presupuesto</span>
-          <button onClick={handleEnableNotifications}>
+          <button 
+            onClick={handleEnableNotifications}
+            className="btn-secondary"
+            style={{ background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.3)', color: 'white' }}
+          >
             Habilitar Notificaciones
           </button>
         </div>
