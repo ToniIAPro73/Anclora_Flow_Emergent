@@ -116,40 +116,137 @@
   --ocean-gradient: linear-gradient(180deg, var(--color-neutral-100) 0%, var(--color-neutral-200) 100%);
 }
 
-/* Card styles with maritime theme */
-.stats-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
+/* Cards oficiales según guía de estilos Anclora */
+.card, .dashboard-card, .form-card {
+  background: var(--color-neutral-200);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 12px;
+  padding: var(--space-3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: var(--transition-fast);
 }
 
-.stats-card:hover {
+.card:hover, .dashboard-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
-.stats-card-total {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.dashboard-section {
+  background: var(--color-neutral-200);
+  border-radius: 12px;
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  border: 1px solid var(--color-neutral-300);
 }
 
-.stats-card-completed {
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-  color: white;
+.dashboard-section h3 {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-neutral-900);
+  margin-bottom: var(--space-2);
 }
 
-.stats-card-overdue {
-  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-  color: white;
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
 }
 
-.stats-card-active {
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-  color: white;
+/* Formularios oficiales */
+.form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--wave-gradient);
+  padding: var(--space-3);
+}
+
+.form-card {
+  background: var(--color-neutral-100);
+  border-radius: 12px;
+  padding: var(--space-4);
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: var(--space-3);
+}
+
+.form-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-neutral-900);
+  margin-bottom: var(--space-1);
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: var(--space-2);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--color-neutral-900);
+  background-color: var(--color-neutral-100);
+  transition: var(--transition-fast);
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-color: var(--color-primary);
+}
+
+.form-input:disabled, .form-select:disabled, .form-textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--color-neutral-200);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  margin-top: var(--space-4);
+}
+
+/* Iconos usando Material Symbols Rounded */
+.icon {
+  font-family: 'Material Symbols Rounded';
+  font-variation-settings: 'FILL' 0, 'wght' 400;
+  font-size: 24px;
+  color: var(--color-neutral-900);
+}
+
+.icon-lg {
+  font-size: 32px;
+}
+
+.icon-sm {
+  font-size: 20px;
+}
+
+.icon-active {
+  color: var(--color-primary);
+}
+
+.icon-success {
+  color: var(--color-success);
+}
+
+.icon-warning {
+  color: var(--color-warning);
+}
+
+.icon-danger {
+  color: var(--color-danger);
 }
 
 /* Navigation styles */
