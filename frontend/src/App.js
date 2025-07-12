@@ -283,6 +283,7 @@ function App() {
   const getPageTitle = () => {
     const titles = {
       'dashboard': '🏠 Dashboard',
+      'ai-assistant': '🤖 Asistente IA',
       'timeline': '🌊 Marea de Tiempo',
       'advanced-budget': '💰 Presupuesto Avanzado',
       'notification-settings': '🔔 Notificaciones',
