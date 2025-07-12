@@ -436,6 +436,13 @@ function App() {
             onSaveSettings={handleSaveNotificationSettings}
           />
         );
+      case 'ai-assistant':
+        return (
+          <AIFinancialAssistant 
+            user={currentUser}
+            onViewChange={setCurrentView}
+          />
+        );
       default:
         return <div>Vista no encontrada</div>;
     }
