@@ -303,7 +303,7 @@ function App() {
   };
 
   const shouldShowMobileNav = () => {
-    return isMobile && currentUser && ['dashboard', 'timeline', 'advanced-budget', 'notification-settings'].includes(currentView);
+    return isMobile && currentUser && ['dashboard', 'ai-assistant', 'timeline', 'advanced-budget'].includes(currentView);
   };
 
   const handleEnableNotifications = async () => {
