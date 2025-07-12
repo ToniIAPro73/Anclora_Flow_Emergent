@@ -7,6 +7,7 @@ import {
   MobileDashboard,
   Timeline,
   AdvancedBudget,
+  AIFinancialAssistant,
   NotificationSettings,
   NotificationToast,
   MobileNavigation,
