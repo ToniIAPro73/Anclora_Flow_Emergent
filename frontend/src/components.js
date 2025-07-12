@@ -2969,6 +2969,12 @@ export const MobileNavigation = ({ currentView, onViewChange, user }) => {
       view: 'dashboard'
     },
     {
+      id: 'ai',
+      label: 'IA',
+      icon: '🤖',
+      view: 'ai-assistant'
+    },
+    {
       id: 'timeline',
       label: 'Timeline',
       icon: '🌊',
@@ -2979,12 +2985,6 @@ export const MobileNavigation = ({ currentView, onViewChange, user }) => {
       label: 'Presupuesto',
       icon: '💰',
       view: 'advanced-budget'
-    },
-    {
-      id: 'notifications',
-      label: 'Notificaciones',
-      icon: '🔔',
-      view: 'notification-settings'
     }
   ];
 
