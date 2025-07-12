@@ -1057,18 +1057,18 @@ class AncloraBackendTest(unittest.TestCase):
         """Test AI Financial Recommendations endpoints - CRITICAL: These endpoints are not implemented"""
         logger.info("Testing AI Financial Recommendations endpoints...")
         
-        profile = "content_creator"
-        user_id = self.user_ids[profile]
+        # Use a test user ID - doesn't matter since endpoints don't exist
+        test_user_id = "test-user-id"
         
         # Test GET /api/ai-recommendations/{user_id} - Should exist but doesn't
-        response = requests.get(f"{API_URL}/ai-recommendations/{user_id}")
+        response = requests.get(f"{API_URL}/ai-recommendations/{test_user_id}")
         self.assertEqual(response.status_code, 404, f"AI recommendations endpoint should not exist yet but got {response.status_code}")
-        logger.error(f"CRITICAL: GET /api/ai-recommendations/{user_id} endpoint is not implemented")
+        logger.error(f"CRITICAL: GET /api/ai-recommendations/{test_user_id} endpoint is not implemented")
         
         # Test GET /api/ai-chat/{user_id} - Should exist but doesn't  
-        response = requests.get(f"{API_URL}/ai-chat/{user_id}")
+        response = requests.get(f"{API_URL}/ai-chat/{test_user_id}")
         self.assertEqual(response.status_code, 404, f"AI chat endpoint should not exist yet but got {response.status_code}")
-        logger.error(f"CRITICAL: GET /api/ai-chat/{user_id} endpoint is not implemented")
+        logger.error(f"CRITICAL: GET /api/ai-chat/{test_user_id} endpoint is not implemented")
         
         # Test POST /api/ai-recommendations/{recommendation_id}/action - Should exist but doesn't
         fake_recommendation_id = "test-recommendation-id"
