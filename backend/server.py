@@ -271,6 +271,34 @@ class NotificationSettingsCreate(BaseModel):
     daily_summary: bool = True
     weekly_report: bool = True
 
+# AI Financial Recommendations Models
+class AIRecommendation(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    type: str  # "savings", "alert", "goal", "optimization", "insight"
+    category: str
+    title: str
+    message: str
+    action_suggestion: str
+    priority: int  # 1-5, 5 being highest
+    confidence_score: float  # 0.0-1.0
+    potential_savings: float = 0.0
+    maritime_theme: str  # Maritime terminology used
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    status: str = "active"  # active, dismissed, completed
+
+class AIInsights(BaseModel):
+    user_id: str
+    analysis_period: str
+    total_recommendations: int
+    high_priority_count: int
+    potential_monthly_savings: float
+    spending_health_score: float  # 0.0-100.0
+    top_recommendations: List[AIRecommendation]
+    spending_patterns: Dict[str, Any]
+    financial_goals_analysis: Dict[str, Any]
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 class DiaryEntryCreate(BaseModel):
     content: str
     mood: Mood
