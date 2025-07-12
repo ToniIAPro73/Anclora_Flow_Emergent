@@ -1161,6 +1161,228 @@ async def get_user_notifications(user_id: str, limit: int = 50):
     
     return notifications
 
+# AI Financial Recommendations Engine
+class FinancialAIEngine:
+    """
+    Intelligent Financial Recommendations Engine for Anclora
+    Uses advanced algorithms and pattern analysis to generate personalized recommendations
+    """
+    
+    @staticmethod
+    def analyze_spending_patterns(transactions, user_profile):
+        """Analyze user spending patterns and detect anomalies"""
+        if not transactions:
+            return {}
+        
+        # Calculate category totals and averages
+        category_spending = {}
+        monthly_totals = {}
+        
+        for transaction in transactions:
+            if transaction.get('type') == 'expense':
+                category = transaction.get('category', 'Other')
+                amount = transaction.get('amount', 0)
+                month = transaction.get('created_at', datetime.now()).strftime('%Y-%m')
+                
+                if category not in category_spending:
+                    category_spending[category] = []
+                category_spending[category].append(amount)
+                
+                if month not in monthly_totals:
+                    monthly_totals[month] = 0
+                monthly_totals[month] += amount
+        
+        # Calculate statistics
+        patterns = {
+            'category_averages': {},
+            'category_trends': {},
+            'spending_volatility': {},
+            'monthly_growth': 0
+        }
+        
+        for category, amounts in category_spending.items():
+            patterns['category_averages'][category] = sum(amounts) / len(amounts)
+            patterns['spending_volatility'][category] = max(amounts) - min(amounts) if len(amounts) > 1 else 0
+        
+        # Calculate monthly growth
+        if len(monthly_totals) >= 2:
+            months = sorted(monthly_totals.keys())
+            last_month = monthly_totals[months[-1]]
+            prev_month = monthly_totals[months[-2]]
+            patterns['monthly_growth'] = ((last_month - prev_month) / prev_month) * 100 if prev_month > 0 else 0
+        
+        return patterns
+    
+    @staticmethod
+    def generate_savings_recommendations(patterns, user_profile, budget_limits):
+        """Generate intelligent savings recommendations"""
+        recommendations = []
+        maritime_terms = {
+            'high': ['⚓ Anclar', '🌊 Navegar hacia', '🧭 Rumbo a'],
+            'medium': ['⛵ Ajustar velas', '🏝️ Puerto seguro', '🌅 Nuevo horizonte'],
+            'low': ['🪝 Pequeño ajuste', '🌊 Ligera corriente', '⚓ Anclaje menor']
+        }
+        
+        # High spending categories
+        for category, avg_spending in patterns.get('category_averages', {}).items():
+            if avg_spending > 300:  # High spending threshold
+                potential_savings = avg_spending * 0.15  # 15% savings potential
+                
+                recommendations.append(AIRecommendation(
+                    user_id="",  # Will be set by caller
+                    type="savings",
+                    category=category,
+                    title=f"⚓ Oportunidad de Ahorro en {category}",
+                    message=f"Navegando por tus gastos, detecté que podrías reducir un 15% en '{category}' sin afectar tu estilo de vida",
+                    action_suggestion=f"Revisar gastos específicos en {category} y optimizar",
+                    priority=4,
+                    confidence_score=0.85,
+                    potential_savings=potential_savings,
+                    maritime_theme="⚓ Anclar ahorros"
+                ))
+        
+        # Volatile spending patterns
+        for category, volatility in patterns.get('spending_volatility', {}).items():
+            if volatility > 200:  # High volatility
+                recommendations.append(AIRecommendation(
+                    user_id="",
+                    type="optimization",
+                    category=category,
+                    title=f"🌊 Estabilizar Mareas de Gasto en {category}",
+                    message=f"Tus gastos en '{category}' tienen altibajos de ${volatility:.0f}. Un presupuesto fijo te ayudaría a navegar mejor",
+                    action_suggestion=f"Establecer límite mensual para {category}",
+                    priority=3,
+                    confidence_score=0.75,
+                    maritime_theme="🌊 Calmar las mareas"
+                ))
+        
+        return recommendations
+    
+    @staticmethod
+    def generate_alert_recommendations(current_spending, budget_limits, user_profile):
+        """Generate intelligent spending alerts"""
+        recommendations = []
+        
+        for limit in budget_limits:
+            category = limit.get('category', '')
+            limit_amount = limit.get('limit_amount', 0)
+            spent = current_spending.get(category, 0)
+            
+            if spent > limit_amount * 0.8:  # 80% threshold
+                percentage = (spent / limit_amount) * 100
+                priority = 5 if percentage >= 100 else 4
+                
+                recommendations.append(AIRecommendation(
+                    user_id="",
+                    type="alert",
+                    category=category,
+                    title=f"⚠️ Marea Alta en {category}",
+                    message=f"Has navegado hasta el {percentage:.0f}% de tu límite en '{category}' (${spent:.0f}/${limit_amount:.0f})",
+                    action_suggestion="Reducir gastos o ajustar presupuesto",
+                    priority=priority,
+                    confidence_score=0.95,
+                    maritime_theme="⚠️ Marea alta detectada"
+                ))
+        
+        return recommendations
+    
+    @staticmethod
+    def generate_goal_recommendations(savings_goals, income_data, user_profile):
+        """Generate intelligent goal-setting recommendations"""
+        recommendations = []
+        
+        if not savings_goals and income_data:
+            avg_income = sum(income_data) / len(income_data) if income_data else 0
+            
+            # Suggest emergency fund
+            emergency_target = avg_income * 3  # 3 months of income
+            recommendations.append(AIRecommendation(
+                user_id="",
+                type="goal",
+                category="Emergency Fund",
+                title="🏝️ Crear Fondo de Emergencia",
+                message=f"Como buen capitán, necesitas un puerto seguro. Te sugiero crear un fondo de emergencia de ${emergency_target:.0f}",
+                action_suggestion="Crear meta de ahorro para fondo de emergencia",
+                priority=5,
+                confidence_score=0.9,
+                potential_savings=emergency_target,
+                maritime_theme="🏝️ Puerto seguro financiero"
+            ))
+        
+        # Analyze existing goals
+        for goal in savings_goals:
+            current = goal.get('current_amount', 0)
+            target = goal.get('target_amount', 0)
+            
+            if current / target > 0.8:  # Close to completion
+                recommendations.append(AIRecommendation(
+                    user_id="",
+                    type="insight",
+                    category="Goals",
+                    title=f"🎯 ¡Cerca del Puerto! - {goal.get('title', 'Meta')}",
+                    message=f"Estás navegando excelente hacia tu meta '{goal.get('title', '')}'. Solo ${target - current:.0f} para llegar a puerto",
+                    action_suggestion="Hacer push final para completar la meta",
+                    priority=3,
+                    confidence_score=0.8,
+                    maritime_theme="🎯 Llegando a puerto"
+                ))
+        
+        return recommendations
+    
+    @staticmethod
+    def calculate_financial_health_score(patterns, budget_data, savings_goals):
+        """Calculate overall financial health score (0-100)"""
+        score = 50  # Base score
+        
+        # Positive factors
+        if budget_data.get('net_balance', 0) > 0:
+            score += 20
+        
+        if len(savings_goals) > 0:
+            score += 15
+        
+        if patterns.get('monthly_growth', 0) < 5:  # Controlled growth
+            score += 10
+        
+        # Negative factors
+        if patterns.get('monthly_growth', 0) > 20:  # Too much growth
+            score -= 15
+        
+        high_volatility_categories = [k for k, v in patterns.get('spending_volatility', {}).items() if v > 200]
+        score -= len(high_volatility_categories) * 5
+        
+        return max(0, min(100, score))
+    
+    @staticmethod
+    def generate_personalized_insights(user_profile, all_data):
+        """Generate insights specific to user profile"""
+        insights = {}
+        
+        profile_recommendations = {
+            'content_creator': {
+                'focus_areas': ['Equipment', 'Marketing', 'Education'],
+                'advice': 'Invierte en herramientas que generen ROI directo',
+                'maritime_analogy': 'Como un capitán experto, invierte en el mejor equipo de navegación'
+            },
+            'freelancer': {
+                'focus_areas': ['Tools', 'Marketing', 'Emergency Fund'],
+                'advice': 'Diversifica tus ingresos como un comerciante marítimo',
+                'maritime_analogy': 'Navega múltiples rutas comerciales para asegurar ingresos'
+            },
+            'student': {
+                'focus_areas': ['Education', 'Transportation', 'Food'],
+                'advice': 'Optimiza gastos básicos para maximizar tu educación',
+                'maritime_analogy': 'Como un grumete, aprende mientras optimizas recursos'
+            },
+            'professional': {
+                'focus_areas': ['Career Development', 'Savings', 'Investments'],
+                'advice': 'Construye riqueza a largo plazo como un experimentado capitán',
+                'maritime_analogy': 'Planifica rutas largas con múltiples puertos de inversión'
+            }
+        }
+        
+        return profile_recommendations.get(user_profile, profile_recommendations['professional'])
+
 # Include the router in the main app
 app.include_router(api_router)
 
