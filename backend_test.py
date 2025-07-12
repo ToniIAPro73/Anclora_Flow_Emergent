@@ -1053,6 +1053,36 @@ class AncloraBackendTest(unittest.TestCase):
         
         logger.info("Error handling tests completed")
 
+    def test_35_ai_recommendations_endpoints_missing(self):
+        """Test AI Financial Recommendations endpoints - CRITICAL: These endpoints are not implemented"""
+        logger.info("Testing AI Financial Recommendations endpoints...")
+        
+        profile = "content_creator"
+        user_id = self.user_ids[profile]
+        
+        # Test GET /api/ai-recommendations/{user_id} - Should exist but doesn't
+        response = requests.get(f"{API_URL}/ai-recommendations/{user_id}")
+        self.assertEqual(response.status_code, 404, f"AI recommendations endpoint should not exist yet but got {response.status_code}")
+        logger.error(f"CRITICAL: GET /api/ai-recommendations/{user_id} endpoint is not implemented")
+        
+        # Test GET /api/ai-chat/{user_id} - Should exist but doesn't  
+        response = requests.get(f"{API_URL}/ai-chat/{user_id}")
+        self.assertEqual(response.status_code, 404, f"AI chat endpoint should not exist yet but got {response.status_code}")
+        logger.error(f"CRITICAL: GET /api/ai-chat/{user_id} endpoint is not implemented")
+        
+        # Test POST /api/ai-recommendations/{recommendation_id}/action - Should exist but doesn't
+        fake_recommendation_id = "test-recommendation-id"
+        response = requests.post(f"{API_URL}/ai-recommendations/{fake_recommendation_id}/action", json={"action": "completed"})
+        self.assertEqual(response.status_code, 404, f"AI recommendation action endpoint should not exist yet but got {response.status_code}")
+        logger.error(f"CRITICAL: POST /api/ai-recommendations/{fake_recommendation_id}/action endpoint is not implemented")
+        
+        logger.error("CRITICAL FINDING: All AI Financial Recommendations endpoints are missing from the backend implementation")
+        logger.error("The FinancialAIEngine class is defined but no API routes use it")
+        logger.error("Required endpoints to implement:")
+        logger.error("1. GET /api/ai-recommendations/{user_id} - Generate financial recommendations")
+        logger.error("2. GET /api/ai-chat/{user_id} - AI chat system with financial questions")
+        logger.error("3. POST /api/ai-recommendations/{recommendation_id}/action - Update recommendation status")
+
 if __name__ == "__main__":
     # Run the tests in order
     unittest.main(verbosity=2)
