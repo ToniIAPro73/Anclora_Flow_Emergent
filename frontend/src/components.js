@@ -584,36 +584,60 @@ export const Dashboard = ({
       <div className="dashboard-grid">
         {/* Gestión de Anclas */}
         <div className="dashboard-section">
-          <h3>⚓ Gestión de Anclas</h3>
+          <div className="section-header">
+            <h3>⚓ Gestión de Anclas</h3>
+            <button
+              onClick={() => onViewChange('create-ancla')}
+              className="btn-primary"
+            >
+              + Nueva Ancla
+            </button>
+          </div>
           
           <div className="mb-4">
             <h4 className="font-semibold text-gray-700 mb-2">Anclajes Activos</h4>
             
-            {activeAnclas.today.length > 0 && (
-              <div className="mb-4">
-                <h5 className="text-sm font-medium text-gray-600 mb-2">🌅 Hoy</h5>
-                {activeAnclas.today.map((ancla) => (
-                  <AnclaItem key={ancla.id} ancla={ancla} onComplete={onCompleteAncla} />
-                ))}
+            {data?.anclas?.active?.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">⚓</div>
+                <h4>No tienes anclas activas</h4>
+                <p>¡Comienza creando tu primera ancla para organizar tus tareas!</p>
+                <button
+                  onClick={() => onViewChange('create-ancla')}
+                  className="btn-primary mt-3"
+                >
+                  🚀 Crear mi primera ancla
+                </button>
               </div>
-            )}
+            ) : (
+              <>
+                {activeAnclas.today.length > 0 && (
+                  <div className="mb-4">
+                    <h5 className="text-sm font-medium text-gray-600 mb-2">🌅 Hoy</h5>
+                    {activeAnclas.today.map((ancla) => (
+                      <AnclaItem key={ancla.id} ancla={ancla} onComplete={onCompleteAncla} />
+                    ))}
+                  </div>
+                )}
 
-            {activeAnclas.tomorrow.length > 0 && (
-              <div className="mb-4">
-                <h5 className="text-sm font-medium text-gray-600 mb-2">🌄 Mañana</h5>
-                {activeAnclas.tomorrow.map((ancla) => (
-                  <AnclaItem key={ancla.id} ancla={ancla} onComplete={onCompleteAncla} />
-                ))}
-              </div>
-            )}
+                {activeAnclas.tomorrow.length > 0 && (
+                  <div className="mb-4">
+                    <h5 className="text-sm font-medium text-gray-600 mb-2">🌄 Mañana</h5>
+                    {activeAnclas.tomorrow.map((ancla) => (
+                      <AnclaItem key={ancla.id} ancla={ancla} onComplete={onCompleteAncla} />
+                    ))}
+                  </div>
+                )}
 
-            {activeAnclas.upcoming.length > 0 && (
-              <div className="mb-4">
-                <h5 className="text-sm font-medium text-gray-600 mb-2">🌊 Próximamente</h5>
-                {activeAnclas.upcoming.map((ancla) => (
-                  <AnclaItem key={ancla.id} ancla={ancla} onComplete={onCompleteAncla} />
-                ))}
-              </div>
+                {activeAnclas.upcoming.length > 0 && (
+                  <div className="mb-4">
+                    <h5 className="text-sm font-medium text-gray-600 mb-2">🌊 Próximamente</h5>
+                    {activeAnclas.upcoming.map((ancla) => (
+                      <AnclaItem key={ancla.id} ancla={ancla} onComplete={onCompleteAncla} />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
