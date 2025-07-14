@@ -395,6 +395,131 @@ small {
   border: 1px solid var(--color-neutral-300);
 }
 
+/* Cards y secciones del dashboard */
+.dashboard-section {
+  background: var(--color-neutral-200);
+  border-radius: 12px;
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  border: 1px solid var(--color-neutral-300);
+}
+
+.dashboard-section h3 {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-neutral-900);
+  margin-bottom: var(--space-2);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+/* Stats Cards */
+.stats-card {
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 12px;
+  padding: var(--space-3);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--wave-gradient);
+}
+
+.stats-card-active::before {
+  background: var(--color-primary);
+}
+
+.stats-card-completed::before {
+  background: var(--color-success);
+}
+
+.stats-card-overdue::before {
+  background: var(--color-danger);
+}
+
+.stats-card-total::before {
+  background: var(--color-secondary);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--space-4) var(--space-2);
+  color: var(--color-neutral-900);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-2);
+  opacity: 0.6;
+}
+
+.empty-state h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+  color: var(--color-neutral-900);
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--color-neutral-900);
+  opacity: 0.8;
+  margin-bottom: var(--space-3);
+}
+
+/* Spacing utilities */
+.space-y-3 > * + * {
+  margin-top: var(--space-3);
+}
+
+.mt-3 {
+  margin-top: var(--space-3);
+}
+
+.mt-4 {
+  margin-top: var(--space-4);
+}
+
+.mt-6 {
+  margin-top: var(--space-6);
+}
+
+/* Text utilities */
+.text-gray-800 {
+  color: var(--color-neutral-900);
+}
+
+.text-gray-600 {
+  color: var(--color-neutral-900);
+  opacity: 0.8;
+}
+
+.text-gray-700 {
+  color: var(--color-neutral-900);
+  opacity: 0.9;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
 /* Elementos de lista y navegación */
 .ancla-item, .habit-item, .objective-item, .transaction-item, .diary-entry {
   background: var(--color-neutral-100);
