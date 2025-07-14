@@ -497,6 +497,8 @@ small {
   transition: var(--transition-fast);
   text-align: center;
   min-width: 250px;
+  position: relative;
+  overflow: hidden;
 }
 
 .profile-card:hover {
@@ -505,10 +507,39 @@ small {
   border-color: var(--color-primary);
 }
 
+.profile-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
 .profile-card.selected {
-  background: var(--color-primary);
+  background: var(--wave-gradient);
   color: var(--color-neutral-100);
   border-color: var(--color-primary-dark);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(0, 110, 230, 0.2);
+}
+
+.profile-card.selected:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 110, 230, 0.25);
+}
+
+.profile-card.selected::before {
+  content: '✓';
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  background: var(--color-neutral-100);
+  color: var(--color-primary);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* Estados de focus para accesibilidad */
