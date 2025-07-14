@@ -548,6 +548,68 @@ small {
   outline-offset: 2px;
 }
 
+/* Demo user section estilos */
+.demo-user-section {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+
+.demo-user-card {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: var(--space-3);
+  text-align: center;
+  margin-bottom: var(--space-2);
+}
+
+.demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.demo-icon {
+  font-size: 18px;
+}
+
+.demo-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-neutral-900);
+}
+
+.demo-button {
+  background: var(--wave-gradient);
+  color: var(--color-neutral-100);
+  border: none;
+  border-radius: 6px;
+  padding: calc(var(--space-1) + 2px) var(--space-2);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.demo-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 110, 230, 0.3);
+}
+
+/* Loading spinner oficial */
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
 /* Utilidades de espaciado Anclora */
 .p-1 { padding: var(--space-1); }
 .p-2 { padding: var(--space-2); }
