@@ -111,6 +111,27 @@ export const ProfileSelection = ({ onProfileSelect, loading }) => {
                 <h3 className="text-xl font-semibold mb-4 text-center">
                   Información Personal
                 </h3>
+                
+                {/* Usuario de prueba */}
+                <div className="demo-user-section">
+                  <div className="demo-user-card">
+                    <div className="demo-header">
+                      <span className="demo-icon">🎯</span>
+                      <span className="demo-text">¿Quieres probar la aplicación?</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setUserInfo({
+                        name: 'Marina Demo',
+                        email: 'marina@anclora.demo'
+                      })}
+                      className="demo-button"
+                    >
+                      Usar usuario de prueba
+                    </button>
+                  </div>
+                </div>
+
                 <div className="form-group">
                   <label className="form-label">Nombre</label>
                   <input
