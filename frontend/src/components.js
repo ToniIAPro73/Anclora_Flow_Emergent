@@ -1063,7 +1063,7 @@ const AnclaItem = ({ ancla, onComplete }) => {
         {ancla.status === 'active' && (
           <button
             onClick={() => onComplete(ancla.id)}
-            className="text-sm bg-green-100 text-green-700 px-2 py-1 rounded ml-2"
+            className="btn-primary btn-small"
           >
             Completar
           </button>
