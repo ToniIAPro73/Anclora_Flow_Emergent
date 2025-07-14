@@ -661,7 +661,7 @@ export const Dashboard = ({
                   <span className="font-medium">{habit.name}</span>
                   <button
                     onClick={() => onTrackHabit(habit.id)}
-                    className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded"
+                    className="btn-secondary btn-small"
                   >
                     Marcar
                   </button>
